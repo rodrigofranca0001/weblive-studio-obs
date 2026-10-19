@@ -19,15 +19,29 @@ O ecossistema possui **4 endereços principais**:
 
 ---
 
-## 2. Como Iniciar o Servidor
+## 2. Como Iniciar o Sistema (Executável Portátil `.EXE` — Sem Terminal!)
 
-1. Abra o terminal na pasta do projeto (`c:\Projetos\Transmissão OBS`).
-2. Execute o comando:
+Você **não precisa usar terminal** nem instalar Node.js nos computadores de transmissão.
+
+### Opção A (Recomendada): Executar `WebLiveStudio.exe` com Duplo Clique
+1. Copie o arquivo único **`WebLiveStudio.exe`** para qualquer computador Windows (via Pen Drive, Rede ou GitHub).
+2. Dê um **duplo clique em `WebLiveStudio.exe`**.
+3. Uma janela gráfica de controle (**WebLive Studio — Central Executável Portátil**) se abrirá iniciando automaticamente o servidor local na porta `3000` e abrindo o **Painel do Diretor** no seu navegador padrão.
+4. Na própria janela do `WebLiveStudio.exe`, você tem botões de **1 clique** para:
+   * **🎛️ Abrir Painel do Diretor** (`http://localhost:3000/index.html`)
+   * **📺 Abrir Tela OBS (Output)** (`http://localhost:3000/output.html`)
+   * **🧼 Abrir Saída Clean Feed** (`http://localhost:3000/output.html?clean=1`)
+   * **📱 Abrir Link do Repórter Remoto** (`http://localhost:3000/guest.html?guest=Reporter1`)
+   * **Copiar URL** pronta para colar na *Fonte de Navegador (Browser Source)* do OBS Studio.
+
+> **Como funciona a portabilidade?** O `WebLiveStudio.exe` já traz todos os módulos HTML, CSS, JavaScript e o servidor HTTP/SSE/Stream Deck embutidos dentro do próprio binário, além de carregar alterações da pasta `public/` caso ela esteja ao lado dele. Se você editar o código-fonte e quiser regerar o executável, basta rodar `npm run build:exe` (`node build-exe.js`).
+
+### Opção B (Apenas para Desenvolvedores via Node.js)
+1. Caso esteja editando o código via Node.js:
    ```powershell
    node server.js
    ```
-   *(ou `npm start`)*
-3. O terminal exibirá todos os links prontos para uso na porta `3000`.
+   *(ou `npm run build:exe` para recompilar o `WebLiveStudio.exe`)*.
 
 ---
 
@@ -173,3 +187,4 @@ http://localhost:3000/api/webhook/alert?user=NomeDoApoiador&amount=R$%2050,00&ms
    * **🟢 EM PREVIEW:** Diretor selecionou sua câmera no Preview (prepare-se).
    * **🔴 VOCÊ ESTÁ NO AR! (PROGRAM):** Sua imagem está sendo transmitida ao vivo no OBS.
 5. Caso o 4G oscile, o watchdog de **Auto-Reconexão (`#50`)** renegocia a conexão automaticamente sem travar a tela do OBS.
+

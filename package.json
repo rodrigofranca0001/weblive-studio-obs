@@ -4,7 +4,8 @@
   "description": "Plataforma Web Completa de Produção Ao Vivo, Switcher, WebRTC Call com Mix-Minus e Overlay para OBS Studio",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build:exe": "node build-exe.js"
   },
   "dependencies": {
     "ws": "^8.16.0"

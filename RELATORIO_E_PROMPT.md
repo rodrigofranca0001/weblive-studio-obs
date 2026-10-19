@@ -100,9 +100,10 @@ DIRETRIZ OBRIGATÓRIA DE DOCUMENTAÇÃO E MANUTENÇÃO CONTÍNUA:
 
 > **ATENÇÃO (INSTRUÇÃO PERMANENTE DO PROJETO):**
 > Sempre que qualquer arquivo de código deste projeto for modificado, criado ou removido:
-> 1. **Atualize imediatamente o arquivo [`MANUAL_DE_USO.md`](./MANUAL_DE_USO.md)** refletindo como operar a nova funcionalidade ou alteração.
-> 2. **Atualize este arquivo [`RELATORIO_E_PROMPT.md`](./RELATORIO_E_PROMPT.md)** registrando a mudança na tabela de arquitetura e na seção de Histórico de Modificações (Changelog).
-> 3. **Faça commit e push** para o repositório oficial no GitHub (`https://github.com/rodrigofranca0001/weblive-studio-obs`).
+> 1. **Recompile imediatamente o executável portátil (`node build-exe.js`)** para que o arquivo `WebLiveStudio.exe` esteja sempre sincronizado com as últimas alterações de HTML/CSS/JS.
+> 2. **Atualize imediatamente o arquivo [`MANUAL_DE_USO.md`](./MANUAL_DE_USO.md)** refletindo como operar a nova funcionalidade ou alteração.
+> 3. **Atualize este arquivo [`RELATORIO_E_PROMPT.md`](./RELATORIO_E_PROMPT.md)** registrando a mudança na tabela de arquitetura e na seção de Histórico de Modificações (Changelog).
+> 4. **Faça commit e push** (incluindo o `WebLiveStudio.exe` atualizado) para o repositório oficial no GitHub (`https://github.com/rodrigofranca0001/weblive-studio-obs`).
 
 ---
 
@@ -130,6 +131,9 @@ DIRETRIZ OBRIGATÓRIA DE DOCUMENTAÇÃO E MANUTENÇÃO CONTÍNUA:
 | `public/js/webrtc-call.js` | Gerenciador `RTCPeerConnection`, Signaling, Speedtest e Watchdog de Auto-Reconexão 4G. | Core `#7`, `#39`, `#41`, `#50` |
 | `public/js/director-app.js` | Orquestrador do Diretor: Cenas, Cortes, Stingers, GC, Placar, Macros, Agendamento, JSON e Logs CSV. | Core `#1`-`#7` e integração das 50 funções |
 | `public/js/output-app.js` | Receptor em tempo real para o OBS Studio, renderizando Canvas + DOM Overlays e Stingers. | Sincronia sub-milissegundo com o Diretor e suporte a `?clean=1` |
+| `WebLiveStudio.exe` | **Executável Portátil Único p/ Windows (435 KB)** com Interface Gráfica (GUI) e Servidor HTTP/SSE/Stream Deck nativo embutido. | Execução em qualquer PC com duplo clique (sem terminal e sem Node.js) |
+| `launcher/Launcher.cs` | Código-fonte C# WinForms + `HttpListener` do executável portátil. | GUI nativa Windows, System Tray, SSE e fallback single-file |
+| `build-exe.js` | Empacotador e compilador automatizado que embute `public/` e gera `WebLiveStudio.exe`. | Build portátil automatizado (`npm run build:exe`) |
 | `MANUAL_DE_USO.md` | Manual operacional passo a passo de todas as interfaces, OBS Browser Source, WebRTC, Áudio e APIs. | Documentação de uso (atualizada a cada modificação) |
 | `RELATORIO_E_PROMPT.md` | Prompt Mestre + Relatório Arquitetural + Regra de Atualização Contínua + Changelog. | Continuidade de projeto à prova de interrupções |
 
@@ -139,6 +143,7 @@ DIRETRIZ OBRIGATÓRIA DE DOCUMENTAÇÃO E MANUTENÇÃO CONTÍNUA:
 
 * **v1.0.0:** Implementação inicial completa da plataforma **WebLive Studio** (Servidor Node.js SSE/API, Painel do Diretor, Tela Output OBS com Clean Feed, Entrada Remota WebRTC com Mix-Minus, Compositor de Vídeo Canvas 60fps, Engine WebAudio DSP e 50 funções adicionais).
 * **v1.0.1:** Criação do Manual de Instruções de Uso ([`MANUAL_DE_USO.md`](./MANUAL_DE_USO.md)) e inclusão da diretriz obrigatória no Prompt Mestre ([`RELATORIO_E_PROMPT.md`](./RELATORIO_E_PROMPT.md)) exigindo atualização automática do manual e do relatório a cada nova modificação no projeto.
+* **v1.1.0:** Criação do executável portátil nativo **`WebLiveStudio.exe`** ([`launcher/Launcher.cs`](./launcher/Launcher.cs) + [`build-exe.js`](./build-exe.js)). Permite copiar um único arquivo `.exe` para qualquer computador Windows e abrir todo o sistema com duplo clique através de uma janela gráfica própria (sem usar terminal e sem exigir Node.js instalado).
 
 ---
 
