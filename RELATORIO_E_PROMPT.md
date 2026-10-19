@@ -88,7 +88,21 @@ Categoria 5: Técnicos e Avançados (41-50)
 48. Suporte a Web MIDI: Controlar faders de áudio usando uma mesa controladora física conectada via USB.
 49. Log de Ações (History): Histórico do que foi para o ar (útil para comprovar exibição de comerciais).
 50. Auto-Reconexão: Se o repórter remoto cair no 4G, o sistema deve reconectá-lo e voltar para a cena suavemente sem travar o OBS.
+
+DIRETRIZ OBRIGATÓRIA DE DOCUMENTAÇÃO E MANUTENÇÃO CONTÍNUA:
+- Manter um Manual de Instruções de Uso completo (MANUAL_DE_USO.md) e este Relatório de Desenvolvimento (RELATORIO_E_PROMPT.md) dentro do projeto.
+- A CADA MODIFICAÇÃO, novo recurso, alteração de rota, ajuste de layout ou correção feita no código, você DEVE obrigatoriamente atualizar o MANUAL_DE_USO.md e o RELATORIO_E_PROMPT.md (incluindo o Changelog) antes de encerrar a tarefa, além de sincronizar com o repositório GitHub (rodrigofranca0001/weblive-studio-obs).
 ```
+
+---
+
+## 🚨 1.1. Regra de Ouro para IA / Desenvolvedores (Atualização Obrigatória a Cada Modificação)
+
+> **ATENÇÃO (INSTRUÇÃO PERMANENTE DO PROJETO):**
+> Sempre que qualquer arquivo de código deste projeto for modificado, criado ou removido:
+> 1. **Atualize imediatamente o arquivo [`MANUAL_DE_USO.md`](./MANUAL_DE_USO.md)** refletindo como operar a nova funcionalidade ou alteração.
+> 2. **Atualize este arquivo [`RELATORIO_E_PROMPT.md`](./RELATORIO_E_PROMPT.md)** registrando a mudança na tabela de arquitetura e na seção de Histórico de Modificações (Changelog).
+> 3. **Faça commit e push** para o repositório oficial no GitHub (`https://github.com/rodrigofranca0001/weblive-studio-obs`).
 
 ---
 
@@ -116,6 +130,15 @@ Categoria 5: Técnicos e Avançados (41-50)
 | `public/js/webrtc-call.js` | Gerenciador `RTCPeerConnection`, Signaling, Speedtest e Watchdog de Auto-Reconexão 4G. | Core `#7`, `#39`, `#41`, `#50` |
 | `public/js/director-app.js` | Orquestrador do Diretor: Cenas, Cortes, Stingers, GC, Placar, Macros, Agendamento, JSON e Logs CSV. | Core `#1`-`#7` e integração das 50 funções |
 | `public/js/output-app.js` | Receptor em tempo real para o OBS Studio, renderizando Canvas + DOM Overlays e Stingers. | Sincronia sub-milissegundo com o Diretor e suporte a `?clean=1` |
+| `MANUAL_DE_USO.md` | Manual operacional passo a passo de todas as interfaces, OBS Browser Source, WebRTC, Áudio e APIs. | Documentação de uso (atualizada a cada modificação) |
+| `RELATORIO_E_PROMPT.md` | Prompt Mestre + Relatório Arquitetural + Regra de Atualização Contínua + Changelog. | Continuidade de projeto à prova de interrupções |
+
+---
+
+## 📝 2.3. Histórico de Modificações (Changelog)
+
+* **v1.0.0:** Implementação inicial completa da plataforma **WebLive Studio** (Servidor Node.js SSE/API, Painel do Diretor, Tela Output OBS com Clean Feed, Entrada Remota WebRTC com Mix-Minus, Compositor de Vídeo Canvas 60fps, Engine WebAudio DSP e 50 funções adicionais).
+* **v1.0.1:** Criação do Manual de Instruções de Uso ([`MANUAL_DE_USO.md`](./MANUAL_DE_USO.md)) e inclusão da diretriz obrigatória no Prompt Mestre ([`RELATORIO_E_PROMPT.md`](./RELATORIO_E_PROMPT.md)) exigindo atualização automática do manual e do relatório a cada nova modificação no projeto.
 
 ---
 
@@ -137,3 +160,4 @@ Se você abrir este projeto em uma nova sessão ou outro computador, basta segui
    * Integração opcional com servidor TURN dedicado (Coturn) para redes corporativas restritas no WebRTC.
    * Integração opcional via OAuth com API oficial do YouTube Live Chat / Twitch IRC em `server.js`.
    * Shaders WebGL 2.0 customizados (GLSL) adicionais para transições 3D e Lutting de cor avançado.
+
