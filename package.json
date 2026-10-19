@@ -1,0 +1,13 @@
+{
+  "name": "weblive-studio",
+  "version": "1.0.0",
+  "description": "Plataforma Web Completa de Produção Ao Vivo, Switcher, WebRTC Call com Mix-Minus e Overlay para OBS Studio",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  }
+}
+

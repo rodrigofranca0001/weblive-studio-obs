@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebLive Studio • Entrada Remota do Repórter (WebRTC Call + Mix-Minus)</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body style="padding:16px; max-width:960px; margin:0 auto;">
+
+  <!-- Função #24: Tally Light Gigante no Topo do Celular do Repórter -->
+  <div id="guestTallyBanner" style="background:#1c2331; border:3px solid var(--border-color); border-radius:10px; padding:14px 20px; display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; transition:all 0.25s ease;">
+    <div>
+      <div style="font-size:11px; color:var(--text-muted); font-weight:700;">TALLY LIGHT DO REPÓRTER (#24)</div>
+      <div id="guestTallyStateText" style="font-size:22px; font-weight:900;">⚪ STANDBY • AGUARDANDO DIRETOR</div>
+    </div>
+    <div id="guestTalkbackPill" style="display:none; background:var(--accent-amber); color:#000; padding:8px 14px; border-radius:8px; font-weight:900; font-size:13px;">
+      🎙️ DIRETOR FALANDO NO SEU FONE (INTERCOM #16)
+    </div>
+  </div>
+
+  <!-- Grid de Monitores do Repórter: Câmera Enviada vs Retorno Program (Mix-Minus) -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+    <div class="card-module">
+      <div class="card-header">
+        <span>📱 SUA CÂMERA (ENVIANDO AO ESTÚDIO)</span>
+        <span id="guestNetBadge" class="badge-tag">4G / Wi-Fi Auto-Reconnect (#50)</span>
+      </div>
+      <div class="viewport-16-9">
+        <video id="guestLocalVideo" autoplay playsinline muted></video>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button id="btnGuestStartCall" class="btn btn-pvw" style="flex:1;">📡 Entrar Ao Vivo (WebRTC)</button>
+        <button id="btnGuestScreenShare" class="btn" title="Compartilhar Tela (#39)">🖥️ Compartilhar Tela (#39)</button>
+      </div>
+    </div>
+
+    <div class="card-module">
+      <div class="card-header">
+        <span>📺 RETORNO DO AR (PROGRAM + MIX-MINUS)</span>
+        <span class="badge-tag" style="color:#00e676;">Zero Eco (Mix-Minus Ativo)</span>
+      </div>
+      <div class="viewport-16-9">
+        <video id="guestProgramReturnVideo" autoplay playsinline></video>
+        <canvas id="guestFallbackReturnCanvas" width="640" height="360"></canvas>
+      </div>
+      <div style="font-size:11px; color:var(--text-muted);">
+        Você ouve o Apresentador, Vídeos e o Intercom do Diretor (#16), com sua própria voz subtraída automaticamente no barramento WebAudio Mix-Minus.
+      </div>
+    </div>
+  </div>
+
+  <!-- Função #41: Testador de Banda Integrado antes de entrar ao vivo -->
+  <div class="card-module" style="margin-top:14px;">
+    <div class="card-header">
+      <span>📶 Diagnóstico de Rede & Speedtest do Repórter (#41)</span>
+      <button id="btnGuestSpeedtest" class="btn btn-blue btn-sm">Executar Teste de Banda</button>
+    </div>
+    <div id="guestSpeedtestOutput" style="font-family:var(--font-mono); font-size:12px; color:var(--text-main);">
+      Clique em "Executar Teste de Banda" para medir Upload, Latência (RTT) e Jitter antes de entrar no ar.
+    </div>
+  </div>
+
+  <script src="/js/state-sync.js"></script>
+  <script src="/js/video-compositor.js"></script>
+  <script src="/js/webrtc-call.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const guestId = params.get('guest') || 'Reporter1';
+
+      const sync = new WebLiveSyncEngine('guest');
+      const webrtc = new WebLiveWebRTCManager(sync, 'guest', guestId);
+      const fallbackCompositor = new WebLiveVideoCompositor(document.getElementById('guestFallbackReturnCanvas'), 'guest');
+
+      let activeScene = { name: 'Estúdio Principal', subtitle: 'Retorno Program Ao Vivo', bgTheme: 'cyber-grid' };
+
+      // Loop visual de retorno caso o stream WebRTC ainda esteja negociando ICE
+      const renderReturnFallback = () => {
+        fallbackCompositor.renderSceneFrame(activeScene, []);
+        requestAnimationFrame(renderReturnFallback);
+      };
+      requestAnimationFrame(renderReturnFallback);
+
+      // Recebe Tally Light (#24), Intercom Talkback (#16) e Estado de Retorno do Diretor
+      sync.onMessage((msg) => {
+        if (!msg) return;
+        if (msg.type === 'TALLY_UPDATE') {
+          const banner = document.getElementById('guestTallyBanner');
+          const txt = document.getElementById('guestTallyStateText');
+          if (msg.data.tally === 'PGM') {
+            banner.style.background = 'rgba(229, 57, 53, 0.32)';
+            banner.style.borderColor = '#ff1744';
+            txt.textContent = '🔴 VOCÊ ESTÁ NO AR! (PROGRAM ON-AIR)';
+          } else if (msg.data.tally === 'PVW') {
+            banner.style.background = 'rgba(0, 200, 83, 0.25)';
+            banner.style.borderColor = '#00e676';
+            txt.textContent = '🟢 EM PREVIEW (PREPARE-SE PARA ENTRAR)';
+          } else {
+            banner.style.background = '#1c2331';
+            banner.style.borderColor = 'var(--border-color)';
+            txt.textContent = '⚪ STANDBY • AGUARDANDO NO ESTÚDIO';
+          }
+        } else if (msg.type === 'TALKBACK_STATUS') {
+          const pill = document.getElementById('guestTalkbackPill');
+          if (pill) pill.style.display = msg.data?.active ? 'block' : 'none';
+        } else if (msg.type === 'STATE_UPDATE' && msg.data?.scenes) {
+          const pgm = msg.data.scenes.find((s) => s.id === msg.data.pgmSceneId);
+          if (pgm) activeScene = pgm;
+        }
+      });
+
+      webrtc.onRemoteTrackCallback = (id, stream) => {
+        const retVid = document.getElementById('guestProgramReturnVideo');
+        const fbCanvas = document.getElementById('guestFallbackReturnCanvas');
+        if (retVid) {
+          retVid.srcObject = stream;
+          if (fbCanvas) fbCanvas.style.display = 'none';
+        }
+      };
+
+      // Entrar ao vivo com Câmera + Microfone (ou stream sintético se sem webcam física)
+      document.getElementById('btnGuestStartCall')?.addEventListener('click', async () => {
+        let localStream = null;
+        try {
+          localStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 1280, height: 720 },
+            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+          });
+          document.getElementById('guestLocalVideo').srcObject = localStream;
+        } catch (_) {
+          // Cria stream a partir do canvas para demonstração caso o navegador não tenha webcam
+          const c = document.getElementById('guestFallbackReturnCanvas');
+          if (c && c.captureStream) localStream = c.captureStream(30);
+        }
+        await webrtc.startGuestSession(localStream);
+        document.getElementById('guestNetBadge').textContent = 'CONECTADO • MIX-MINUS OK';
+      });
+
+      // Função #39: Compartilhar Tela do Convidado via WebRTC
+      document.getElementById('btnGuestScreenShare')?.addEventListener('click', async () => {
+        try {
+          const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+          document.getElementById('guestLocalVideo').srcObject = screenStream;
+          await webrtc.startGuestSession(screenStream);
+        } catch (_) {}
+      });
+
+      // Função #41: Speedtest Integrado
+      document.getElementById('btnGuestSpeedtest')?.addEventListener('click', async () => {
+        const out = document.getElementById('guestSpeedtestOutput');
+        out.textContent = 'Medindo taxa de Upload, RTT e Jitter...';
+        const res = await webrtc.runBandwidthTest();
+        out.textContent = `✅ Upload: ${res.uploadMbps} Mbps | Latência RTT: ${res.rttMs}ms | Jitter: ${res.jitterMs}ms | Status: ${res.quality}`;
+      });
+    });
+  </script>
+</body>
+</html>
+

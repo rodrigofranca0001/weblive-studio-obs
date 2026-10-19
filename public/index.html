@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebLive Studio • Painel do Diretor (Director Interface)</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <!-- ========================================================================
+       HEADER / TOPBAR DO DIRETOR (Status, Perfis #29, Saúde CPU/RAM #42, Panic #20)
+       ======================================================================== -->
+  <header class="director-header">
+    <div class="brand-logo">
+      <span class="live-dot"></span>
+      <span>WEBLIVE STUDIO <small style="color:var(--text-muted); font-weight:500;">PRO SWITCHER v1.0</small></span>
+    </div>
+
+    <div class="header-metrics">
+      <!-- Função #26: Relógio Digital com Fuso Horário -->
+      <div class="metric-pill" title="Relógio Broadcast com Fuso Horário (#26)">
+        <span>🕒</span>
+        <span id="clockDisplay">00:00:00</span>
+        <select id="timezoneSelect" style="width:auto; padding:2px 4px; font-size:10px;">
+          <option value="America/Sao_Paulo">BRT (SP)</option>
+          <option value="UTC">UTC</option>
+          <option value="America/New_York">EST (NY)</option>
+          <option value="Europe/Lisbon">WET (LIS)</option>
+        </select>
+      </div>
+
+      <!-- Função #42: Monitoramento de CPU / Memória / FPS -->
+      <div class="metric-pill" title="Saúde do Navegador: FPS, CPU & Memória (#42)">
+        <span>⚡</span>
+        <span id="healthMetrics">60 FPS • CPU 12% • RAM 148MB</span>
+      </div>
+
+      <!-- Função #36: Previsão do Tempo Ao Vivo -->
+      <div class="metric-pill" title="Widget de Clima Integrado (#36)">
+        <span>🌤️</span>
+        <span id="weatherTopPill">São Paulo 24°C</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Função #29: Perfis de Usuário (RBAC: Diretor, Operador de GC, Operador de Áudio) -->
+      <select id="roleProfileSelect" title="Perfil de Operação (#29)" style="width:155px;">
+        <option value="director">🎬 Perfil: Diretor Geral</option>
+        <option value="gc">🏷️ Operador de GC</option>
+        <option value="audio">🎚️ Operador de Áudio</option>
+      </select>
+
+      <!-- Função #20: Mute de Segurança (Panic Button) -->
+      <button id="btnPanicMute" class="btn btn-pgm" title="Cortar todo o áudio instantaneamente (#20)">
+        🔇 PANIC MUTE
+      </button>
+
+      <!-- Função #30: Modo Noturno / Claro -->
+      <button id="btnThemeToggle" class="btn" title="Alternar Dark / Light Mode (#30)">
+        🌙 Tema
+      </button>
+
+      <!-- Links Rápidos para abrir o Output do OBS, Clean Feed (#43) e Convidado WebRTC -->
+      <a href="/output.html" target="_blank" class="btn btn-blue" title="Abrir Tela de Exibição (OBS Browser Source)">
+        📺 Abrir Output OBS
+      </a>
+      <a href="/output.html?clean=1" target="_blank" class="btn" title="Saída Clean Feed sem gráficos/tarjetas (#43)">
+        🧼 Clean Feed
+      </a>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       WORKSPACE PRINCIPAL DO DIRETOR (3 COLUNAS MODULARES RESPONSIVAS)
+       ======================================================================== -->
+  <main class="director-workspace">
+
+    <!-- COLUNA ESQUERDA: CENAS, FONTES DE MÍDIA WEB, CALL WEBRTC & PLAYLIST -->
+    <section class="panel-column" id="colLeft">
+
+      <!-- Core #1: Gerenciamento de Cenas + Lock Scene (#44) + Macros (#21) -->
+      <div class="card-module" data-role-section="director">
+        <div class="card-header">
+          <span>🎬 Cenas (Scenes) & Atalhos [1-6]</span>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <!-- Função #44: Bloqueio de Cena (Lock Scene) -->
+            <label style="display:flex; align-items:center; gap:4px; cursor:pointer; font-size:11px; color:var(--accent-amber);">
+              <input type="checkbox" id="chkLockScene" /> 🔒 Lock (#44)
+            </label>
+            <button id="btnAddScene" class="btn btn-sm btn-blue">+ Cena</button>
+          </div>
+        </div>
+        <div id="scenesGrid" class="scenes-grid"></div>
+      </div>
+
+      <!-- Core #7: Link de Entrada Remota (WebRTC Call + Mix-Minus + Tally #24 + Speedtest #41) -->
+      <div class="card-module" data-role-section="director,audio">
+        <div class="card-header">
+          <span>📱 Entrada Remota WebRTC (Mix-Minus)</span>
+          <span id="guestStatusBadge" class="badge-tag">Aguardando</span>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="guestLinkInput" readonly value="" />
+          <button id="btnCopyGuestLink" class="btn btn-blue btn-sm">Copiar</button>
+          <a id="btnOpenGuestTab" href="/guest.html?guest=Reporter1" target="_blank" class="btn btn-sm">Abrir</a>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+          <!-- Função #16: Talkback / Intercom Push-to-Talk -->
+          <button id="btnTalkbackPTT" class="btn btn-amber btn-sm" style="flex:1;">
+            🎙️ Segure p/ Talkback (Intercom #16)
+          </button>
+          <!-- Função #39: Captura de Tela / Screen Share -->
+          <button id="btnStartScreenShare" class="btn btn-sm" title="Compartilhar Tela via WebRTC (#39)">
+            🖥️ Screen Share (#39)
+          </button>
+          <!-- Função #41: Testador de Banda Integrado -->
+          <button id="btnRunSpeedtest" class="btn btn-sm" title="Testar Banda e Latência (#41)">
+            📶 Speedtest (#41)
+          </button>
+        </div>
+        <div id="speedtestResult" style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono);">
+          Tally Remoto: Sincronizado • Mix-Minus: Ativo (-∞ dB próprio eco)
+        </div>
+      </div>
+
+      <!-- Core #2 & #22: Fontes de Mídia Web (YouTube/FB/Instagram) + Playlist Automática -->
+      <div class="card-module" data-role-section="director">
+        <div class="card-header">
+          <span>🌐 Mídia Web & Playlist (#22)</span>
+          <span class="badge-tag">YT / FB / IG / MP4</span>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="webMediaUrlInput" placeholder="URL YouTube, Instagram, Facebook ou MP4..." value="https://www.youtube.com/embed/jfKfPfyJRdk" />
+          <button id="btnAddMediaPlaylist" class="btn btn-blue btn-sm">+ Fila</button>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button id="btnMediaPlay" class="btn btn-pvw btn-sm" style="flex:1;">▶ Play no Ar</button>
+          <button id="btnMediaPause" class="btn btn-sm" style="flex:1;">⏸ Pause</button>
+          <button id="btnMediaNext" class="btn btn-sm" style="flex:1;">⏭ Próx. Playlist</button>
+        </div>
+        <div id="playlistContainer" style="display:flex; flex-direction:column; gap:4px; max-height:95px; overflow-y:auto; font-size:11px;"></div>
+      </div>
+
+      <!-- Captura de Câmera Local + Microfone Alternativo (Core #6) -->
+      <div class="card-module" data-role-section="director,audio">
+        <div class="card-header">
+          <span>📷 Câmera Local & Roteamento Áudio</span>
+          <button id="btnStartLocalCam" class="btn btn-blue btn-sm">Ligar Câmera</button>
+        </div>
+        <div class="form-row">
+          <span style="font-size:11px; color:var(--text-muted);">Fonte de Áudio (Core #6):</span>
+          <select id="audioRouteSelect">
+            <option value="embedded">Áudio Embutido da Câmera</option>
+            <option value="external_mic">Microfone Externo USB / XLR</option>
+            <option value="muted">Desativar Áudio da Câmera</option>
+          </select>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- COLUNA CENTRAL: MONITORES PVW / PGM, TRANSIÇÕES STINGER & EFEITOS VISUAIS / GC -->
+    <section class="panel-column" id="colCenter">
+
+      <!-- MONITORES PREVIEW (PVW) E PROGRAM (PGM) + BARRA DE CORTE/STINGER -->
+      <div class="card-module">
+        <div class="monitors-grid">
+          <!-- MONITOR PREVIEW -->
+          <div class="monitor-box pvw">
+            <div class="monitor-title">
+              <span>🟢 PREVIEW (PVW)</span>
+              <span id="pvwSceneName">CENA 2 - REPÓRTER</span>
+            </div>
+            <div class="viewport-16-9">
+              <canvas id="pvwCanvas" width="640" height="360"></canvas>
+              <div id="pvwSnapGrid" class="snap-grid-overlay"></div>
+            </div>
+          </div>
+
+          <!-- BARRA DE TRANSIÇÃO (CUT, AUTO FADE, STINGER Core #3, REPLAY #8) -->
+          <div class="transition-bar">
+            <button id="btnCut" class="btn btn-pgm" title="Corte Seco Imediato (Atalho: Espaço)">
+              ✂️ CUT
+            </button>
+            <button id="btnAutoFade" class="btn btn-blue" title="Transição Suave Crossfade">
+              ✨ AUTO
+            </button>
+            <button id="btnStinger" class="btn btn-amber" title="Transição Stinger Animada (Core #3)">
+              ⚡ STINGER
+            </button>
+            <button id="btnInstantReplay" class="btn" title="Exibir Replay dos últimos 10s (#8)">
+              ⏪ REPLAY
+            </button>
+            <label class="btn btn-sm" style="text-align:center;" title="Ativar Guias Magnéticas e Snap (#47)">
+              <input type="checkbox" id="chkSnapGrid" style="display:none;" /> 📏 Grid #47
+            </label>
+          </div>
+
+          <!-- MONITOR PROGRAM (ON-AIR) + WHITEBOARD INTERATIVO (#40) -->
+          <div class="monitor-box pgm">
+            <div class="monitor-title">
+              <span>🔴 PROGRAM (NO AR • OBS)</span>
+              <span id="pgmSceneName">CENA 1 - ESTÚDIO</span>
+            </div>
+            <div class="viewport-16-9" id="pgmViewport">
+              <canvas id="pgmCanvas" width="640" height="360" style="cursor:crosshair;"></canvas>
+              <div id="pgmSnapGrid" class="snap-grid-overlay"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra rápida de Whiteboard (#40), Gravação de Backup (#27) e Countdown (#25) -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; padding-top:4px;">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <label style="display:flex; align-items:center; gap:5px; font-size:11px; cursor:pointer;">
+              <input type="checkbox" id="chkWhiteboardMode" /> ✏️ Desenhar na Tela (Whiteboard #40)
+            </label>
+            <input type="color" id="whiteboardColor" value="#ffeb3b" style="width:28px; height:24px; border:none; background:none; cursor:pointer;" />
+            <button id="btnClearWhiteboard" class="btn btn-sm">Limpar Desenho</button>
+          </div>
+
+          <div style="display:flex; gap:6px; align-items:center;">
+            <!-- Função #25: Cronômetro Regressivo Gigante (Countdown) -->
+            <button id="btnToggleCountdown" class="btn btn-sm">⏳ Countdown Live (#25)</button>
+            <!-- Função #27: Gravação Local de Backup via MediaRecorder -->
+            <button id="btnBackupRecord" class="btn btn-sm">⏺️ Gravar Backup Local (#27)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO MULTIFUNCIONAL EM ABAS (GC, PLACAR, VÍDEO/CHROMA, ENGAJAMENTO, AUTOMAÇÃO) -->
+      <div class="card-module">
+        <div class="tabs-nav">
+          <button class="tab-btn active" data-tab="tabGC">🏷️ GC, Placar & Ticker</button>
+          <button class="tab-btn" data-tab="tabVideo">🎨 Vídeo, PiP, Grid & Chroma (#1-#10)</button>
+          <button class="tab-btn" data-tab="tabSocial">💬 Chat, Enquetes, Meta & QR (#31-#40)</button>
+          <button class="tab-btn" data-tab="tabAuto">⚙️ Automação, Agendamento, JSON & Logs (#21-#50)</button>
+        </div>
+
+        <!-- ABA 1: TARJETAS (LOWER THIRDS Core #5), PLACAR ESPORTIVO (Core #4) E TICKER (#7/#37) -->
+        <div id="tabGC" class="tab-pane active" data-role-section="director,gc">
+          <div class="form-row">
+            <!-- Core #5: Lower Thirds Fixas ou Temporárias -->
+            <div style="background:var(--bg-card); padding:10px; border-radius:6px; display:flex; flex-direction:column; gap:6px;">
+              <strong style="font-size:11px; color:var(--accent-blue);">TARJETA / LOWER THIRD (CORE #5)</strong>
+              <input type="text" id="ltTitleInput" placeholder="Título Principal (Nome / Manchete)" value="DR. CARLOS MENDES" />
+              <input type="text" id="ltSubInput" placeholder="Subtítulo / Cargo / Crédito" value="Especialista em Transmissões Ao Vivo" />
+              <div style="display:flex; gap:6px; align-items:center;">
+                <select id="ltModeSelect" style="flex:1;">
+                  <option value="permanent">Fixa (Permanente)</option>
+                  <option value="temp5">Temporária (5 seg)</option>
+                  <option value="temp8">Temporária (8 seg)</option>
+                </select>
+                <button id="btnToggleLT" class="btn btn-pgm btn-sm">Exibir / Ocultar GC</button>
+              </div>
+            </div>
+
+            <!-- Core #4: Placar Esportivo / Competitivo Dinâmico -->
+            <div style="background:var(--bg-card); padding:10px; border-radius:6px; display:flex; flex-direction:column; gap:6px;">
+              <strong style="font-size:11px; color:var(--accent-pvw);">PLACAR ESPORTIVO & CRONÔMETRO (CORE #4)</strong>
+              <div style="display:grid; grid-template-columns:1fr 55px 1fr 55px; gap:4px;">
+                <input type="text" id="scoreTeamA" value="BRASIL" />
+                <input type="number" id="scorePtsA" value="2" min="0" />
+                <input type="text" id="scoreTeamB" value="ARGENTINA" />
+                <input type="number" id="scorePtsB" value="1" min="0" />
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button id="btnToggleScoreboard" class="btn btn-blue btn-sm" style="flex:1;">Placar No Ar</button>
+                <button id="btnScoreTimerToggle" class="btn btn-sm">⏱️ Iniciar/Pausar</button>
+                <button id="btnScoreTimerReset" class="btn btn-sm">Zerar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Função #7 e #37: Ticker Tape / Crawl Contínuo + Feed RSS Automático -->
+          <div style="background:var(--bg-card); padding:10px; border-radius:6px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+            <strong style="font-size:11px;">📰 TICKER / CRAWL (#7):</strong>
+            <input type="text" id="tickerTextInput" style="flex:1;" value="URGENTE: WebLive Studio opera em 60fps com Mix-Minus WebRTC nativo • Acompanhe nossas redes sociais • " />
+            <button id="btnLoadRssTicker" class="btn btn-sm" title="Puxar manchetes automáticas do Feed RSS (#37)">📡 Puxar Feed RSS (#37)</button>
+            <button id="btnToggleTicker" class="btn btn-pgm btn-sm">Ticker No Ar</button>
+          </div>
+        </div>
+
+        <!-- ABA 2: VÍDEO E VISUAIS (Funções #1 a #10 + Core #3 Stingers IndexedDB) -->
+        <div id="tabVideo" class="tab-pane" data-role-section="director">
+          <div class="form-row">
+            <div style="background:var(--bg-card); padding:10px; border-radius:6px; display:flex; flex-direction:column; gap:6px;">
+              <strong style="font-size:11px;">LAYOUT MULTI-VIEW (#2), PIP (#1) & CHROMA (#3)</strong>
+              <div style="display:flex; gap:6px;">
+                <select id="layoutModeSelect">
+                  <option value="single">Câmera Única (Full)</option>
+                  <option value="pip">Picture-in-Picture (PiP #1)</option>
+                  <option value="grid4">Multi-view Grid 4 Convidados (#2)</option>
+                  <option value="grid8">Multi-view Grid 8 Convidados (#2)</option>
+                </select>
+                <select id="bgLoopSelect" title="Backgrounds Dinâmicos em Loop (#10)">
+                  <option value="cyber-grid">BG: Cyber Grid (#10)</option>
+                  <option value="news-globe">BG: Telejornal (#10)</option>
+                  <option value="stadium-lights">BG: Arena Esportiva (#10)</option>
+                </select>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                <label><input type="checkbox" id="chkChromaKey" /> Fundo Verde Chroma Key (#3)</label>
+                <span>Tolerância:</span>
+                <input type="range" id="rangeChromaTol" min="20" max="135" value="95" style="width:90px;" />
+              </div>
+              <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                <span>Escala PiP (#1):</span>
+                <input type="range" id="rangePipScale" min="15" max="45" value="28" />
+              </div>
+            </div>
+
+            <div style="background:var(--bg-card); padding:10px; border-radius:6px; display:flex; flex-direction:column; gap:6px;">
+              <strong style="font-size:11px;">CORREÇÃO DE COR (#5) & RECORTE CROP (#4)</strong>
+              <div style="display:grid; grid-template-columns:70px 1fr 70px 1fr; gap:4px; align-items:center; font-size:11px;">
+                <span>Brilho:</span>
+                <input type="range" id="rangeBrightness" min="50" max="150" value="100" />
+                <span>Contraste:</span>
+                <input type="range" id="rangeContrast" min="50" max="150" value="100" />
+                <span>Saturação:</span>
+                <input type="range" id="rangeSaturation" min="0" max="200" value="100" />
+                <span>Crop Topo:</span>
+                <input type="range" id="rangeCropTop" min="0" max="30" value="0" />
+              </div>
+              <div style="display:flex; gap:6px; align-items:center; font-size:11px; margin-top:4px;">
+                <span>Stinger/Logo Local (IndexedDB Core #3 & #6):</span>
+                <input type="file" id="fileStingerUpload" accept="image/*,video/webm,video/mp4" style="font-size:10px;" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 3: ENGAJAMENTO, CHAT AO VIVO, ENQUETES, META, DOAÇÕES & QR CODE (#9, #31-#38) -->
+        <div id="tabSocial" class="tab-pane" data-role-section="director,gc">
+          <div class="form-row">
+            <!-- Chat Ao Vivo (#31), Filtro de Palavrões (#38) e Comentário em Destaque (#35) -->
+            <div style="background:var(--bg-card); padding:10px; border-radius:6px; display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:11px;">💬 CHAT AO VIVO (#31) • DESTAQUE (#35)</strong>
+                <label style="font-size:10px;"><input type="checkbox" id="chkProfanityFilter" checked /> Filtro Palavrões (#38)</label>
+              </div>
+              <div id="liveChatFeed" style="max-height:82px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; font-size:11px;"></div>
+              <div style="display:flex; gap:4px;">
+                <input type="text" id="chatAuthorInput" placeholder="Usuário" value=" Mariana_TV" style="width:95px;" />
+                <input type="text" id="chatMsgInput" placeholder="Mensagem de chat p/ destacar..." value="Que estrutura incrível desse WebLive Studio!" />
+                <button id="btnSendChat" class="btn btn-blue btn-sm">Destacar (#35)</button>
+              </div>
+            </div>
+
+            <!-- Enquetes (#32), Barra de Meta (#34), Alerta Webhook (#33) e QR Code (#9) -->
+            <div style="background:var(--bg-card); padding:10px; border-radius:6px; display:flex; flex-direction:column; gap:6px;">
+              <strong style="font-size:11px;">📊 ENQUETE (#32), META (#34), DOAÇÃO (#33) & QR (#9)</strong>
+              <div style="display:flex; gap:6px;">
+                <input type="text" id="qrUrlInput" placeholder="Link QR Code / Pix (#9)" value="https://weblive.studio/pix" />
+                <button id="btnToggleQR" class="btn btn-blue btn-sm">QR No Ar (#9)</button>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button id="btnTogglePoll" class="btn btn-sm" style="flex:1;">📊 Enquete Ao Vivo (#32)</button>
+                <button id="btnVotePollA" class="btn btn-sm">+Voto A</button>
+                <button id="btnVotePollB" class="btn btn-sm">+Voto B</button>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button id="btnToggleSubGoal" class="btn btn-sm" style="flex:1;">🎯 Barra de Meta (#34)</button>
+                <button id="btnTriggerAlert" class="btn btn-amber btn-sm" style="flex:1;">🎉 Simular Superchat (#33)</button>
+                <button id="btnToggleWeather" class="btn btn-sm">🌤️ Clima (#36)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 4: AUTOMAÇÃO, AGENDAMENTO (#28), IMPORT/EXPORT JSON (#45), STREAM DECK (#46) & LOGS (#49) -->
+        <div id="tabAuto" class="tab-pane" data-role-section="director">
+          <div class="form-row">
+            <div style="background:var(--bg-card); padding:10px; border-radius:6px; display:flex; flex-direction:column; gap:6px;">
+              <strong style="font-size:11px;">⏰ AGENDAMENTO (#28) & PROJETO JSON (#45)</strong>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <input type="time" id="scheduleTimeInput" step="1" style="width:110px;" />
+                <select id="scheduleSceneSelect" style="flex:1;"></select>
+                <button id="btnAddSchedule" class="btn btn-blue btn-sm">Agendar (#28)</button>
+              </div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button id="btnExportJson" class="btn btn-sm" style="flex:1;">💾 Exportar JSON (#45)</button>
+                <label class="btn btn-sm" style="flex:1; cursor:pointer;">
+                  📂 Importar JSON
+                  <input type="file" id="fileImportJson" accept=".json" style="display:none;" />
+                </label>
+              </div>
+              <div style="font-size:10px; color:var(--text-muted); font-family:var(--font-mono);">
+                Stream Deck HTTP API (#46): <code>GET /api/streamdeck?action=scene&target=1</code>
+              </div>
+            </div>
+
+            <!-- Função #49: Log de Ações (Histórico auditável de exibições e comerciais) -->
+            <div style="background:var(--bg-card); padding:10px; border-radius:6px; display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; justify-content:space-between;">
+                <strong style="font-size:11px;">📋 LOG DE AÇÕES / COMERCIAIS (#49)</strong>
+                <button id="btnExportLogs" class="btn btn-sm">Baixar CSV</button>
+              </div>
+              <div id="actionLogsBox" style="max-height:85px; overflow-y:auto; font-family:var(--font-mono); font-size:10px; color:var(--text-muted); display:flex; flex-direction:column; gap:3px;"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- COLUNA DIREITA: AUDIO MIXER MULTI-PISTA (#11-#20, #23, #48) & SOUNDBOARD (#15) -->
+    <section class="panel-column" id="colRight" data-role-section="director,audio">
+
+      <!-- Audio Mixer Multi-pista com VU Meters, PFL (#18), Delay (#17), Pan (#19), Gate (#13), Ducking (#14) -->
+      <div class="card-module">
+        <div class="card-header">
+          <span>🎚️ Audio Mixer Multi-Pista (#11)</span>
+          <button id="btnInitMidi" class="btn btn-sm" title="Conectar Controladora USB MIDI (#48)">🎹 MIDI (#48)</button>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; font-size:11px;">
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+            <input type="checkbox" id="chkAudioDucking" checked /> 🦆 Audio Ducking (#14)
+          </label>
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+            <input type="checkbox" id="chkAutoVoiceSwitch" /> 🗣️ Auto-Switch p/ Voz (#23)
+          </label>
+        </div>
+
+        <div id="mixerChannelsContainer" class="mixer-strips"></div>
+        <div id="midiStatusText" style="font-size:10px; color:var(--text-muted); font-family:var(--font-mono);">
+          DSP WebAudio: Noise Gate (#13) + Lip-Sync Delay (#17) + Stereo Pan (#19) prontos
+        </div>
+      </div>
+
+      <!-- Função #15: Soundboard (Efeitos Sonoros Instantâneos) -->
+      <div class="card-module">
+        <div class="card-header">
+          <span>🔊 Soundboard • Efeitos (#15)</span>
+          <span class="badge-tag">WebAudio Synth</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+          <button class="btn btn-sm sfx-trigger" data-sfx="applause">👏 Aplausos</button>
+          <button class="btn btn-sm sfx-trigger" data-sfx="stinger">🎵 Vinheta TV</button>
+          <button class="btn btn-sm sfx-trigger" data-sfx="alert">🔔 Alerta Urgente</button>
+          <button class="btn btn-sm sfx-trigger" data-sfx="countdown_beep">⏱️ Beep Timer</button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Elementos de Vídeo Ocultos para Captura Local, Convidado WebRTC e Replay -->
+  <div style="display:none;">
+    <video id="localCamVideo" autoplay playsinline muted></video>
+    <video id="guestRemoteVideo" autoplay playsinline></video>
+    <video id="screenShareVideo" autoplay playsinline muted></video>
+    <video id="replayPlaybackVideo" autoplay playsinline loop></video>
+  </div>
+
+  <!-- Scripts da Arquitetura WebLive Studio -->
+  <script src="/js/state-sync.js"></script>
+  <script src="/js/audio-engine.js"></script>
+  <script src="/js/video-compositor.js"></script>
+  <script src="/js/webrtc-call.js"></script>
+  <script src="/js/director-app.js"></script>
+</body>
+</html>
+

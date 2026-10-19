@@ -1,0 +1,627 @@
+/* ============================================================================
+ * WebLive Studio - Design System & Broadcast CSS (Director, Output & Guest)
+ * ============================================================================ */
+
+:root {
+  --bg-dark: #0b0e14;
+  --bg-panel: #131822;
+  --bg-card: #1c2331;
+  --bg-hover: #252f42;
+  --border-color: #2b3548;
+  --text-main: #f0f4f8;
+  --text-muted: #8b9bb4;
+  --accent-pgm: #e53935;       /* Vermelho Program (Tally On-Air) */
+  --accent-pvw: #00c853;       /* Verde Preview */
+  --accent-blue: #2979ff;      /* Azul Broadcast */
+  --accent-amber: #ffb300;     /* Alerta / Stinger / Ducking */
+  --accent-purple: #8e24aa;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Função #30: Modo Claro / Escuro (Dark Mode Toggle) */
+body.light-mode {
+  --bg-dark: #e2e8f0;
+  --bg-panel: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-hover: #f1f5f9;
+  --border-color: #cbd5e1;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+/* ============================================================================
+ * TOPBAR DO DIRETOR (Status, Perfis #29, Saúde CPU/RAM #42, Panic Mute #20)
+ * ============================================================================ */
+.director-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px 16px;
+  height: 54px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+
+.live-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-pgm);
+  box-shadow: 0 0 12px var(--accent-pgm);
+  animation: pulseLive 1.4s infinite;
+}
+
+@keyframes pulseLive {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.65; }
+}
+
+.header-metrics {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.metric-pill {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 5px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================================================
+ * LAYOUT PRINCIPAL DO PAINEL DO DIRETOR (Grid Responsivo)
+ * ============================================================================ */
+.director-workspace {
+  display: grid;
+  grid-template-columns: 310px 1fr 360px;
+  gap: 10px;
+  padding: 10px;
+  height: calc(100vh - 54px);
+}
+
+@media (max-width: 1280px) {
+  .director-workspace {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+
+.panel-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.card-module {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 6px;
+}
+
+/* ============================================================================
+ * MONITORES PREVIEW (PVW) E PROGRAM (PGM) + TRANSIÇÕES / STINGER
+ * ============================================================================ */
+.monitors-grid {
+  display: grid;
+  grid-template-columns: 1fr 84px 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .monitors-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.monitor-box {
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--border-color);
+  position: relative;
+}
+
+.monitor-box.pvw {
+  border-color: var(--accent-pvw);
+}
+
+.monitor-box.pgm {
+  border-color: var(--accent-pgm);
+}
+
+.monitor-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+}
+
+.monitor-box.pvw .monitor-title {
+  background: rgba(0, 200, 83, 0.18);
+  color: #4caf50;
+}
+
+.monitor-box.pgm .monitor-title {
+  background: rgba(229, 57, 53, 0.22);
+  color: #ff5252;
+}
+
+.viewport-16-9 {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #05070a;
+  overflow: hidden;
+}
+
+.viewport-16-9 canvas,
+.viewport-16-9 video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Grid de Alinhamento e Snap (#47) e Whiteboard (#40) */
+.snap-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(41, 121, 255, 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(41, 121, 255, 0.25) 1px, transparent 1px);
+  background-size: 12.5% 12.5%;
+  display: none;
+}
+
+.snap-grid-overlay.active {
+  display: block;
+}
+
+.transition-bar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* ============================================================================
+ * BOTÕES, INPUTS, TABS E COMPONENTES DE OPERAÇÃO
+ * ============================================================================ */
+.btn {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn:hover {
+  background: var(--bg-hover);
+  border-color: #4a5a78;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-pgm {
+  background: var(--accent-pgm);
+  border-color: #ff5252;
+  color: #fff;
+}
+
+.btn-pvw {
+  background: var(--accent-pvw);
+  border-color: #00e676;
+  color: #000;
+}
+
+.btn-blue {
+  background: var(--accent-blue);
+  border-color: #448aff;
+  color: #fff;
+}
+
+.btn-amber {
+  background: var(--accent-amber);
+  border-color: #ffd54f;
+  color: #000;
+}
+
+.btn-sm {
+  padding: 4px 7px;
+  font-size: 11px;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="time"],
+select,
+textarea {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 6px 8px;
+  font-size: 12px;
+  width: 100%;
+}
+
+input[type="range"] {
+  accent-color: var(--accent-blue);
+  width: 100%;
+  cursor: pointer;
+}
+
+/* ============================================================================
+ * SELETOR DE CENAS (Core #1, Lock #44, Macros #21)
+ * ============================================================================ */
+.scenes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+  gap: 8px;
+}
+
+.scene-tile {
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 7px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.scene-tile.active-pvw {
+  border-color: var(--accent-pvw);
+  box-shadow: inset 0 0 0 1px var(--accent-pvw);
+}
+
+.scene-tile.active-pgm {
+  border-color: var(--accent-pgm);
+  background: rgba(229, 57, 53, 0.15);
+}
+
+.scene-key-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: rgba(255,255,255,0.08);
+  padding: 1px 5px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+/* ============================================================================
+ * MIXER DE ÁUDIO MULTI-PISTA (Core #6, #11-#20)
+ * ============================================================================ */
+.mixer-strips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mixer-channel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vu-meter-bar {
+  height: 7px;
+  background: #090c10;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.vu-meter-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00e676 0%, #ffeb3b 75%, #ff1744 100%);
+  transition: width 0.06s linear;
+}
+
+/* ============================================================================
+ * ABAS DE MÓDULOS AVANÇADOS (50 Funções)
+ * ============================================================================ */
+.tabs-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 6px;
+}
+
+.tab-btn {
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 5px 9px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  background: var(--accent-blue);
+  color: #fff;
+  border-color: var(--accent-blue);
+}
+
+.tab-pane {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tab-pane.active {
+  display: flex;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.badge-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(41, 121, 255, 0.2);
+  color: #82b1ff;
+  font-family: var(--font-mono);
+}
+
+/* ============================================================================
+ * ESTILOS EXCLUSIVOS DA TELA DE EXIBIÇÃO (OBS BROWSER SOURCE / OUTPUT.HTML)
+ * ============================================================================ */
+body.obs-output-body {
+  background: transparent !important;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+.broadcast-stage {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Placar Esportivo (Core #4) */
+.overlay-scoreboard {
+  position: absolute;
+  top: 36px;
+  left: 48px;
+  display: flex;
+  align-items: center;
+  background: rgba(11, 14, 20, 0.92);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-left: 6px solid var(--accent-blue);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.65);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(-150%);
+  opacity: 0;
+  z-index: 30;
+}
+
+.overlay-scoreboard.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.score-team {
+  padding: 10px 18px;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.score-points {
+  background: var(--accent-blue);
+  color: #fff;
+  padding: 10px 16px;
+  font-size: 24px;
+  font-weight: 900;
+  font-family: var(--font-mono);
+}
+
+.score-timer {
+  background: #18202c;
+  color: #ffd54f;
+  padding: 10px 16px;
+  font-size: 20px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+/* Lower Thirds / Tarjetas Dinâmicas (Core #5) */
+.overlay-lower-third {
+  position: absolute;
+  bottom: 72px;
+  left: 56px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.92));
+  border-left: 8px solid var(--accent-pgm);
+  padding: 16px 32px;
+  border-radius: 0 12px 12px 0;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.7);
+  transform: translateX(-120%);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 35;
+}
+
+.overlay-lower-third.visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.lt-headline {
+  font-size: 28px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.4px;
+}
+
+.lt-subtitle {
+  font-size: 17px;
+  font-weight: 600;
+  color: #38bdf8;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+/* Ticker Tape / Crawl (#7 & #37 Feed RSS) */
+.overlay-ticker {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 44px;
+  background: rgba(11, 14, 20, 0.95);
+  border-top: 3px solid var(--accent-pgm);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  z-index: 40;
+  transform: translateY(100%);
+  transition: transform 0.35s ease;
+}
+
+.overlay-ticker.visible {
+  transform: translateY(0);
+}
+
+.ticker-label {
+  background: var(--accent-pgm);
+  color: #fff;
+  font-weight: 900;
+  padding: 0 18px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  letter-spacing: 1px;
+  z-index: 2;
+}
+
+.ticker-track {
+  white-space: nowrap;
+  display: inline-block;
+  padding-left: 100%;
+  font-size: 18px;
+  font-weight: 600;
+  color: #f8fafc;
+  animation: tickerScroll 28s linear infinite;
+}
+
+@keyframes tickerScroll {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-100%, 0, 0); }
+}
+
+/* Transição Stinger Animada (Core #3) */
+.stinger-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 99;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(41,121,255,0.96) 0%, rgba(11,14,20,0.99) 100%);
+  clip-path: circle(0% at 50% 50%);
+  transition: clip-path 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.stinger-layer.active {
+  clip-path: circle(150% at 50% 50%);
+}
+
