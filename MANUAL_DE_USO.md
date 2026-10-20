@@ -4,56 +4,37 @@
 
 ---
 
-## 1. Visão Geral do Sistema
+## 1. Visão Geral do Sistema (Aplicação Desktop Nativa — Sem Navegador!)
 
-O **WebLive Studio** é uma plataforma web completa de produção ao vivo, corte de câmeras (Switcher), geração de caracteres (GC), mixagem de áudio com **Mix-Minus** e chamada remota via **WebRTC** projetada para operar integrada ao **OBS Studio** (ou vMix).
+O **WebLive Studio Pro v3.0** é um software desktop nativo completo de Produção Ao Vivo, Switcher (PVW/PGM), Geração de Caracteres (GC), Mixagem de Áudio Multi-pista com **Mix-Minus** e Chamada Remota **WebRTC**, construído como um **aplicativo de janela própria em Python (`weblive_studio_gui.pyw`) e Executável Nativo (`WebLiveStudio.exe`)**, **sem abrir páginas HTML no navegador**.
 
-O ecossistema possui **4 endereços principais**:
-
-| Interface | URL Local | Finalidade Principal |
-| :--- | :--- | :--- |
-| **🎛️ Painel do Diretor** | `http://localhost:3000/index.html` | Mesa de corte (PVW/PGM), controle de cenas, áudio, GC, placar e automação. |
-| **📺 Tela OBS (Output)** | `http://localhost:3000/output.html` | Página 1920x1080 transparente/composta para adicionar como *Browser Source* no OBS. |
-| **🧼 Saída Clean Feed** | `http://localhost:3000/output.html?clean=1` | Saída de vídeo limpa (sem GC, sem placar, sem marca d'água e sem alertas) para gravação master (`#43`). |
-| **📱 Convidado Remoto** | `http://localhost:3000/guest.html?guest=Reporter1` | Link para celular/PC externo enviar câmera/tela via WebRTC e receber retorno com Mix-Minus (`Core #7`). |
+### Como o Software Opera (100% Desktop Nativo):
+* **Janela Principal do Estúdio (`WebLiveNativeStudioApp`)**: Contém os monitores nativos **PREVIEW (PVW)** e **PROGRAM (PGM)** renderizados em tempo real, seletor de cenas, barra de transições (`CUT`, `AUTO`, `STINGER`, `REPLAY`), Whiteboard interativo, abas de GC/Placar/Vídeo/Social/Automação e o **Audio Mixer Multi-pista** com VU Meters nativos.
+* **Janela de Projetor Nativo para OBS (`📺 Abrir Projetor Nativo OBS`)**: Abre uma segunda janela dedicada de vídeo limpo em alta definição que você pode capturar diretamente no OBS Studio usando **"Captura de Janela" (Window Capture)** ou enviar em Tela Cheia (`F11` / Duplo Clique) para um segundo monitor/placa de captura HDMI.
+* **Janela Clean Feed (`🧼 Abrir Janela Clean Feed #43`)**: Abre uma janela nativa de vídeo puro sem gráficos, tarjetas ou placar.
 
 ---
 
-## 2. Como Iniciar o Sistema (Plataforma Profissional Python + Executável Portátil `.EXE`)
+## 2. Como Abrir o Programa (Sem Terminal e Sem Abrir Navegador HTML)
 
-O **WebLive Studio Pro v2.0** agora conta com um **Motor Broadcast Nativo em Python 3** (`weblive_server.py` + `weblive_studio_gui.pyw`) integrado a `SQLite3`, extrator `yt-dlp` para streams diretos do YouTube/Twitch/Instagram, parser nativo de Feed RSS sem bloqueio CORS e pipeline de transmissão direta `RTMP / FFmpeg`, além do executável portátil `WebLiveStudio.exe`.
+### Opção A: Duplo Clique em `WebLiveStudio.exe` (Portátil Universal)
+1. Dê um **duplo clique em `WebLiveStudio.exe`**.
+2. Ele abrirá diretamente a **Estação Desktop Nativa v3.0** em janela própria do sistema operacional (sem abrir Chrome/Edge e sem abrir tela preta de terminal).
+   * Se estiver na máquina com Python, ele inicia automaticamente a estação completa `weblive_studio_gui.pyw` via `pythonw.exe`.
+   * Se você copiar apenas o `WebLiveStudio.exe` para outro PC Windows que não tenha Python instalado, ele abre a **Estação Switcher Nativa WinForms C#** embutida dentro do próprio `.exe`!
 
-### Opção A (Estação Profissional Desktop Python — Sem Terminal): `weblive_studio_gui.pyw`
-1. Dê um **duplo clique no arquivo `weblive_studio_gui.pyw`** (a extensão `.pyw` abre diretamente a janela gráfica nativa `Tkinter` no Windows **sem abrir janela de terminal CMD**).
-2. A janela **🐍 WebLive Studio Pro v2.0 — Plataforma Python de Transmissão Ao Vivo & OBS** será exibida contendo:
-   * **Central de Operação Rápida (1 Clique):** Botões para abrir *Painel do Diretor*, *Tela OBS 1080p*, *Saída Clean Feed (`#43`)* e *Link do Repórter WebRTC* (com botão para copiar o IP da rede local para celulares).
-   * **📡 Transmissão Direta RTMP / FFmpeg:** Insira a URL RTMP (`rtmp://a.rtmp.youtube.com/live2`) e a sua *Stream Key* e clique em **`🚀 Iniciar Pipeline RTMP Python`** para acionar o motor de streaming.
-   * **🎞️ Extrator Python `yt-dlp` Integrado:** Cole qualquer link de vídeo ou live (YouTube, Twitch, Instagram, TikTok) e clique em **`⚡ Extrair c/ yt-dlp e Jogar no Ar (OBS)`** para extrair o stream limpo via Python e exibi-lo imediatamente.
-   * **📋 Banco SQLite Nativo (`weblive_studio.db`) & Telemetria em Tempo Real:** Monitora a quantidade de clientes conectados (Abas/OBS/Mobile) e grava automaticamente todo o histórico de auditoria comercial (`#49`) em banco de dados SQLite.
-
-### Opção B (Portátil Único `.EXE` para máquinas sem Python): `WebLiveStudio.exe`
-1. Copie o arquivo único **`WebLiveStudio.exe`** para qualquer computador Windows (via Pen Drive, Rede ou GitHub).
-2. Dê um **duplo clique em `WebLiveStudio.exe`**.
-3. Uma janela gráfica de controle se abrirá iniciando automaticamente o servidor local na porta `3000` e abrindo o **Painel do Diretor** no seu navegador padrão.
-
-### Opção C (Servidor Python via Linha de Comando)
-```powershell
-python weblive_server.py
-```
+### Opção B: Duplo Clique Direto em `weblive_studio_gui.pyw`
+1. Dê um **duplo clique no arquivo `weblive_studio_gui.pyw`**.
+2. A estação nativa Python abrirá imediatamente.
 
 ---
 
-## 3. Como Configurar no OBS Studio (Browser Source)
+## 3. Como Capturar no OBS Studio (Captura de Janela Nativa)
 
-1. No **OBS Studio**, vá no painel **Fontes (Sources)** $\rightarrow$ clique em **`+`** $\rightarrow$ escolha **Navegador (Browser)**.
-2. Nomeie como `WebLive Output Master`.
-3. Configure as propriedades da fonte:
-   * **URL:** `http://localhost:3000/output.html`
-   * **Largura (Width):** `1920`
-   * **Altura (Height):** `1080`
-   * **FPS Personalizado:** `60`
-   * **Controlar áudio via OBS:** Marque caso queira rotear o som da aba diretamente no mixer do OBS.
-4. *(Opcional — Clean Feed `#43`)*: Para gravar uma pista limpa sem tarjetas ou placar, crie uma segunda fonte de navegador apontando para `http://localhost:3000/output.html?clean=1`.
+1. Na barra superior do programa **WebLive Studio Pro v3.0**, clique no botão azul **`📺 Abrir Projetor Nativo OBS (Saída PGM)`** (ou **`🧼 Abrir Janela Clean Feed (#43)`**).
+2. No **OBS Studio**, vá em **Fontes (Sources)** $\rightarrow$ clique em **`+`** $\rightarrow$ escolha **Captura de Janela (Window Capture)**.
+3. Selecione a janela **`[pythonw.exe]: 📺 WebLive Studio Output — PROGRAM OUTPUT`** (ou `[WebLiveStudio.exe]`).
+4. *(Dica)*: Você também pode dar **duplo clique** ou apertar **`F11`** dentro da janela do Projetor Nativo para deixá-la em **Tela Cheia (Fullscreen Projector)** em um segundo monitor!
 
 ---
 

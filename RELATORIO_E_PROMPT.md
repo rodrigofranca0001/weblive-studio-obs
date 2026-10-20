@@ -121,21 +121,9 @@ DIRETRIZ OBRIGATÓRIA DE DOCUMENTAÇÃO E MANUTENÇÃO CONTÍNUA:
 | :--- | :--- | :--- |
 | `package.json` | Manifesto Node.js e script `npm start`. | Setup e execução rápida |
 | `weblive_server.py` | **Motor Broadcast Principal em Python 3**: Servidor HTTP Multithreaded, SSE Hub (`/api/events`), Persistência SQLite3 (`weblive_studio.db`), Extrator `yt-dlp` (`/api/ytdlp`), Streamer `RTMP/FFmpeg` (`/api/rtmp/*`), Proxy RSS Real (`/api/rss`) e API Stream Deck (`#46`). | Conversão completa para Plataforma Profissional Python |
-| `weblive_studio_gui.pyw` | **Estação Desktop Gráfica em Python (`Tkinter`)**: Abre sem terminal, controla servidor Python, RTMP/FFmpeg, Extrator `yt-dlp`, links LAN para celulares e monitora logs SQLite em tempo real. | Operação Desktop Profissional em Python |
-| `requirements.txt` | Dependências Python opcionais/avançadas (`pillow`, `yt-dlp`). | Ambiente Python |
-| `server.js` | Servidor HTTP legado/alternativo em Node.js + SSE + Stream Deck API. | Sincronia multi-dispositivo, `#33` (Webhooks), `#46` (Stream Deck HTTP API) |
-| `public/index.html` | Interface Responsiva do Painel do Diretor (3 colunas, Monitores PVW/PGM, Abas e Mixer). | Core `#1`-`#7`, Topbar com `#20`, `#26`, `#29`, `#30`, `#36`, `#42` |
-| `public/output.html` | Página "Browser Source" 1080p60 para o OBS Studio (suporta parâmetro `?clean=1`). | Core `#2`, `#3`, `#4`, `#5`, `#7`, `#9`, `#25`, `#32`-`#37`, `#43` (Clean Feed) |
-| `public/guest.html` | Interface móvel/web para o Repórter Remoto via WebRTC. | Core `#7` (WebRTC + Retorno PGM + Mix-Minus), `#16`, `#24` (Tally), `#39`, `#41`, `#50` |
-| `public/css/style.css` | Estilização Broadcast Dark/Light Mode, transições CSS e animações de GC/Stinger. | `#7`, `#30`, `#47` (Snap Grid), animações de entrada/saída |
-| `public/js/state-sync.js` | Engine híbrida (`BroadcastChannel` + `EventSource` SSE) + `IndexedDB` local + Utilitários. | Core `#3` (`IndexedDB`), `#6`, `#9` (QR Code Canvas), `#38` (Profanity Filter) |
-| `public/js/audio-engine.js` | Engine DSP via `WebAudio API` + Barramento Mix-Minus + Synth Soundboard + `Web MIDI`. | Core `#6`, Core `#7` (Mix-Minus), `#11`-`#20`, `#23`, `#48` |
-| `public/js/video-compositor.js` | Compositor 60fps em `Canvas 2D`, Chroma Key, Multi-view 4/8, PiP, `MediaRecorder` Replay/Backup e Whiteboard. | `#1`-`#6`, `#8` (Instant Replay 10s), `#10`, `#12`, `#27` (Backup Local), `#40` |
-| `public/js/webrtc-call.js` | Gerenciador `RTCPeerConnection`, Signaling, Speedtest e Watchdog de Auto-Reconexão 4G. | Core `#7`, `#39`, `#41`, `#50` |
-| `public/js/director-app.js` | Orquestrador do Diretor: Cenas, Cortes, Stingers, GC, Placar, Macros, Agendamento, JSON e Logs CSV. | Core `#1`-`#7` e integração das 50 funções |
-| `public/js/output-app.js` | Receptor em tempo real para o OBS Studio, renderizando Canvas + DOM Overlays e Stingers. | Sincronia sub-milissegundo com o Diretor e suporte a `?clean=1` |
-| `WebLiveStudio.exe` | **Executável Portátil Único p/ Windows (435 KB)** com Interface Gráfica (GUI) e Servidor HTTP/SSE/Stream Deck nativo embutido. | Execução em qualquer PC com duplo clique (sem terminal e sem Node.js) |
-| `launcher/Launcher.cs` | Código-fonte C# WinForms + `HttpListener` do executável portátil. | GUI nativa Windows, System Tray, SSE e fallback single-file |
+| `weblive_studio_gui.pyw` | **Estação Desktop Nativa Completa em Python (`Tkinter` + `Pillow` v3.0 — NÃO abre navegador!)**: Software nativo estilo vMix/OBS com Monitores PVW/PGM em tempo real, Janela Nativa de Projetor para Captura de Janela no OBS (`NativeProjectorWindow`), Clean Feed (`#43`), Cenas, Stinger, Replay, Whiteboard (`#40`), GC/Placar/Ticker, Mixer Multi-pista com VU Meters, `yt-dlp`, `RTMP/FFmpeg` e `SQLite3`. | Plataforma Desktop Nativa fora do navegador HTML |
+| `WebLiveStudio.exe` | **Executável Portátil Desktop v3.0**: Inicia automaticamente a Estação Nativa Python (`weblive_studio_gui.pyw` via `pythonw.exe` sem terminal e sem navegador) ou executa sua própria **Estação Switcher Nativa WinForms C# (`NativeStudioForm`)** caso copiado sozinho para um PC sem Python! | Portabilidade 100% Desktop Nativo |
+| `launcher/Launcher.cs` | Código-fonte C# WinForms contendo o Switcher Desktop Nativo (`NativeStudioForm` + `ProjectorForm`) e inicializador silencioso de `pythonw.exe`. | GUI Desktop Nativa Windows |
 | `build-exe.js` | Empacotador e compilador automatizado que embute `public/` e gera `WebLiveStudio.exe`. | Build portátil automatizado (`npm run build:exe`) |
 | `MANUAL_DE_USO.md` | Manual operacional passo a passo de todas as interfaces, OBS Browser Source, WebRTC, Áudio e APIs. | Documentação de uso (atualizada a cada modificação) |
 | `RELATORIO_E_PROMPT.md` | Prompt Mestre + Relatório Arquitetural + Regra de Atualização Contínua + Changelog. | Continuidade de projeto à prova de interrupções |
@@ -154,6 +142,9 @@ DIRETRIZ OBRIGATÓRIA DE DOCUMENTAÇÃO E MANUTENÇÃO CONTÍNUA:
   * **Motor de Transmissão Direta `RTMP / FFmpeg` (`/api/rtmp/start` e `/api/rtmp/stop`)**: permite iniciar pipelines de streaming para YouTube Live / Twitch / Facebook tanto pela GUI Desktop Python quanto pela aba de Automação do Diretor.
   * **Extrator Real de Feed RSS em Python (`/api/rss`)** via `urllib` + `xml.etree.ElementTree`, contornando restrições de CORS para alimentar o Ticker Tape (`#7` e `#37`) com notícias reais ao vivo.
   * **Recompilação do `WebLiveStudio.exe`** com todos os novos controles de interface embutidos.
+* **v3.0.0:** Transformação completa em **Software Desktop Nativo (`WebLiveNativeStudioApp` em `weblive_studio_gui.pyw` e `NativeStudioForm` em `WebLiveStudio.exe`) — SEM abrir páginas HTML no navegador**:
+  * Toda a operação (Monitores duplos `PREVIEW` e `PROGRAM` renderizados a 30/60fps, Seletor de Cenas, Transições `CUT`/`AUTO`/`STINGER`/`REPLAY`, Desenho `Whiteboard #40` com o mouse direto no PGM, `Lower Thirds`, `Placar Esportivo`, `Ticker RSS`, `QR Code`, `Enquetes`, `Audio Mixer Multi-pista` com `VU Meters` nativos e `Soundboard`) roda **100% dentro da janela nativa do programa Desktop**.
+  * Adicionada **Janela de Projetor Nativo (`NativeProjectorWindow` / `ProjectorForm`)** para Saída Program e Saída Clean Feed (`#43`), permitindo capturar o vídeo diretamente no OBS Studio via **"Captura de Janela" (Window Capture)** ou exibir em Tela Cheia (`F11` / Duplo Clique) em um segundo monitor.
 
 ---
 

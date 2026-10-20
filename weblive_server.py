@@ -587,3 +587,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\nEncerrando servidor Python WebLive Studio...")
         srv.stop()
+
