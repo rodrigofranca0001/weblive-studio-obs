@@ -123,20 +123,21 @@
         </div>
       </div>
 
-      <!-- Core #2 & #22: Fontes de Mídia Web (YouTube/FB/Instagram) + Playlist Automática -->
+      <!-- Core #2 & #22: Fontes de Mídia Web (YouTube/FB/Instagram) + Extrator Python yt-dlp + Playlist Automática -->
       <div class="card-module" data-role-section="director">
         <div class="card-header">
-          <span>🌐 Mídia Web & Playlist (#22)</span>
-          <span class="badge-tag">YT / FB / IG / MP4</span>
+          <span>🌐 Mídia Web, yt-dlp & Playlist (#22)</span>
+          <span class="badge-tag">Python yt-dlp / Embed</span>
         </div>
         <div style="display:flex; gap:6px;">
-          <input type="text" id="webMediaUrlInput" placeholder="URL YouTube, Instagram, Facebook ou MP4..." value="https://www.youtube.com/embed/jfKfPfyJRdk" />
+          <input type="text" id="webMediaUrlInput" placeholder="URL YouTube, Instagram, Twitch, Facebook ou MP4..." value="https://www.youtube.com/embed/jfKfPfyJRdk" />
           <button id="btnAddMediaPlaylist" class="btn btn-blue btn-sm">+ Fila</button>
         </div>
         <div style="display:flex; gap:6px;">
-          <button id="btnMediaPlay" class="btn btn-pvw btn-sm" style="flex:1;">▶ Play no Ar</button>
-          <button id="btnMediaPause" class="btn btn-sm" style="flex:1;">⏸ Pause</button>
-          <button id="btnMediaNext" class="btn btn-sm" style="flex:1;">⏭ Próx. Playlist</button>
+          <button id="btnMediaPlay" class="btn btn-pvw btn-sm" style="flex:1;">▶ Play Embed</button>
+          <button id="btnYtdlpExtract" class="btn btn-amber btn-sm" style="flex:1;" title="Extrair stream limpo via backend Python yt-dlp">🐍 Play via yt-dlp</button>
+          <button id="btnMediaPause" class="btn btn-sm">⏸</button>
+          <button id="btnMediaNext" class="btn btn-sm">⏭</button>
         </div>
         <div id="playlistContainer" style="display:flex; flex-direction:column; gap:4px; max-height:95px; overflow-y:auto; font-size:11px;"></div>
       </div>
@@ -384,6 +385,11 @@
                   📂 Importar JSON
                   <input type="file" id="fileImportJson" accept=".json" style="display:none;" />
                 </label>
+              </div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <input type="text" id="rtmpUrlInput" placeholder="rtmp://a.rtmp.youtube.com/live2" value="rtmp://a.rtmp.youtube.com/live2" style="flex:1; font-size:10px;" />
+                <input type="password" id="rtmpKeyInput" placeholder="Stream Key" value="live_python_key" style="width:95px; font-size:10px;" />
+                <button id="btnToggleRtmp" class="btn btn-amber btn-sm" title="Iniciar/Parar Streamer RTMP FFmpeg no Servidor Python">📡 RTMP Python</button>
               </div>
               <div style="font-size:10px; color:var(--text-muted); font-family:var(--font-mono);">
                 Stream Deck HTTP API (#46): <code>GET /api/streamdeck?action=scene&target=1</code>

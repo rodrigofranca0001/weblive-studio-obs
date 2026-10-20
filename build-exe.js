@@ -54,6 +54,11 @@ fs.writeFileSync(BUNDLE_CS, cs, 'utf8');
 const cscPath = 'C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe';
 const cmd = `"${cscPath}" /target:winexe /out:"${OUTPUT_EXE}" /optimize+ /r:System.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll "${path.join(LAUNCHER_DIR, 'Launcher.cs')}" "${BUNDLE_CS}"`;
 
+try {
+  execSync('taskkill /F /IM WebLiveStudio.exe', { stdio: 'ignore' });
+} catch (_) {}
+
 console.log('🔨 Compilando executável portátil WebLiveStudio.exe...');
 execSync(cmd, { stdio: 'inherit' });
 console.log('✅ WebLiveStudio.exe gerado com sucesso em:', OUTPUT_EXE);
+

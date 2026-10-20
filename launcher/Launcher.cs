@@ -62,6 +62,8 @@ namespace WebLiveStudio
             _publicDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "public");
 
             BuildGui();
+            // Se o Python estiver instalado na máquina e os scripts Python existirem,
+            // podemos iniciar o motor Python Pro ou usar o servidor HTTP/SSE embutido 100% compatível!
             StartBroadcastServer();
         }
 
@@ -431,3 +433,4 @@ namespace WebLiveStudio
         }
     }
 }
+

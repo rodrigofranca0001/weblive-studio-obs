@@ -211,7 +211,20 @@ class WebLiveDirectorApp {
       this.broadcastFullState();
     });
 
-    document.getElementById('btnLoadRssTicker')?.addEventListener('click', () => {
+    document.getElementById('btnLoadRssTicker')?.addEventListener('click', async () => {
+      try {
+        const resp = await fetch('/api/rss');
+        const data = await resp.json();
+        if (data && data.ticker_text) {
+          document.getElementById('tickerTextInput').value = data.ticker_text;
+          this.state.ticker.text = data.ticker_text;
+          this.state.ticker.visible = true;
+          this.logAction('Feed RSS Real (#37) extraído via Servidor Python e enviado ao Ticker!');
+          this.broadcastFullState();
+          return;
+        }
+      } catch (_) {}
+
       const rssHeadlines = [
         '📡 [FEED RSS AO VIVO] • Audiência de transmissões interativas via WebRTC cresce 42% no semestre',
         '⚽ [ESPORTES] • Final do campeonato terá transmissão multi-câmera com replay instantâneo',
@@ -348,6 +361,54 @@ class WebLiveDirectorApp {
       this.state.webMedia.playing = true;
       this.sync.send('WEBMEDIA_CONTROL', { action: 'play', url: this.state.webMedia.currentUrl });
       this.logAction(`Play Mídia Web (Core #2): ${this.state.webMedia.currentUrl}`);
+    });
+
+    // Extrator Nativo Python yt-dlp (Converte links do YouTube/Twitch/IG em stream direto)
+    document.getElementById('btnYtdlpExtract')?.addEventListener('click', async () => {
+      const rawUrl = document.getElementById('webMediaUrlInput').value.trim();
+      if (!rawUrl) return;
+      this.logAction(`🐍 Extraindo stream direto via Python yt-dlp: ${rawUrl}...`);
+      try {
+        const resp = await fetch(`/api/ytdlp?url=${encodeURIComponent(rawUrl)}`);
+        const info = await resp.json();
+        const finalUrl = info.direct_url || info.fallback_url || rawUrl;
+        this.state.webMedia.currentUrl = finalUrl;
+        this.state.webMedia.playing = true;
+        this.sync.send('WEBMEDIA_CONTROL', { action: 'play', url: finalUrl, title: info.title });
+        this.logAction(`✅ Python yt-dlp no Ar: ${info.title || finalUrl}`);
+      } catch (_) {
+        this.sync.send('WEBMEDIA_CONTROL', { action: 'play', url: rawUrl });
+      }
+    });
+
+    // Controle de Transmissão RTMP / FFmpeg no Backend Python
+    this.rtmpActive = false;
+    document.getElementById('btnToggleRtmp')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      const rtmpUrl = document.getElementById('rtmpUrlInput')?.value || 'rtmp://a.rtmp.youtube.com/live2';
+      const streamKey = document.getElementById('rtmpKeyInput')?.value || '';
+      try {
+        if (!this.rtmpActive) {
+          const resp = await fetch('/api/rtmp/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rtmp_url: rtmpUrl, stream_key: streamKey })
+          });
+          const res = await resp.json();
+          if (res.ok) {
+            this.rtmpActive = true;
+            btn.textContent = '⏹️ Parar RTMP';
+            btn.classList.replace('btn-amber', 'btn-pgm');
+            this.logAction(`📡 Stream RTMP Python iniciado (${res.mode}): ${rtmpUrl}`);
+          }
+        } else {
+          await fetch('/api/rtmp/stop', { method: 'POST' });
+          this.rtmpActive = false;
+          btn.textContent = '📡 RTMP Python';
+          btn.classList.replace('btn-pgm', 'btn-amber');
+          this.logAction('⏹️ Stream RTMP Python encerrado');
+        }
+      } catch (_) {}
     });
 
     document.getElementById('btnMediaPause')?.addEventListener('click', () => {

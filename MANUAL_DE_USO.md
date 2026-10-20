@@ -19,29 +19,27 @@ O ecossistema possui **4 endereços principais**:
 
 ---
 
-## 2. Como Iniciar o Sistema (Executável Portátil `.EXE` — Sem Terminal!)
+## 2. Como Iniciar o Sistema (Plataforma Profissional Python + Executável Portátil `.EXE`)
 
-Você **não precisa usar terminal** nem instalar Node.js nos computadores de transmissão.
+O **WebLive Studio Pro v2.0** agora conta com um **Motor Broadcast Nativo em Python 3** (`weblive_server.py` + `weblive_studio_gui.pyw`) integrado a `SQLite3`, extrator `yt-dlp` para streams diretos do YouTube/Twitch/Instagram, parser nativo de Feed RSS sem bloqueio CORS e pipeline de transmissão direta `RTMP / FFmpeg`, além do executável portátil `WebLiveStudio.exe`.
 
-### Opção A (Recomendada): Executar `WebLiveStudio.exe` com Duplo Clique
+### Opção A (Estação Profissional Desktop Python — Sem Terminal): `weblive_studio_gui.pyw`
+1. Dê um **duplo clique no arquivo `weblive_studio_gui.pyw`** (a extensão `.pyw` abre diretamente a janela gráfica nativa `Tkinter` no Windows **sem abrir janela de terminal CMD**).
+2. A janela **🐍 WebLive Studio Pro v2.0 — Plataforma Python de Transmissão Ao Vivo & OBS** será exibida contendo:
+   * **Central de Operação Rápida (1 Clique):** Botões para abrir *Painel do Diretor*, *Tela OBS 1080p*, *Saída Clean Feed (`#43`)* e *Link do Repórter WebRTC* (com botão para copiar o IP da rede local para celulares).
+   * **📡 Transmissão Direta RTMP / FFmpeg:** Insira a URL RTMP (`rtmp://a.rtmp.youtube.com/live2`) e a sua *Stream Key* e clique em **`🚀 Iniciar Pipeline RTMP Python`** para acionar o motor de streaming.
+   * **🎞️ Extrator Python `yt-dlp` Integrado:** Cole qualquer link de vídeo ou live (YouTube, Twitch, Instagram, TikTok) e clique em **`⚡ Extrair c/ yt-dlp e Jogar no Ar (OBS)`** para extrair o stream limpo via Python e exibi-lo imediatamente.
+   * **📋 Banco SQLite Nativo (`weblive_studio.db`) & Telemetria em Tempo Real:** Monitora a quantidade de clientes conectados (Abas/OBS/Mobile) e grava automaticamente todo o histórico de auditoria comercial (`#49`) em banco de dados SQLite.
+
+### Opção B (Portátil Único `.EXE` para máquinas sem Python): `WebLiveStudio.exe`
 1. Copie o arquivo único **`WebLiveStudio.exe`** para qualquer computador Windows (via Pen Drive, Rede ou GitHub).
 2. Dê um **duplo clique em `WebLiveStudio.exe`**.
-3. Uma janela gráfica de controle (**WebLive Studio — Central Executável Portátil**) se abrirá iniciando automaticamente o servidor local na porta `3000` e abrindo o **Painel do Diretor** no seu navegador padrão.
-4. Na própria janela do `WebLiveStudio.exe`, você tem botões de **1 clique** para:
-   * **🎛️ Abrir Painel do Diretor** (`http://localhost:3000/index.html`)
-   * **📺 Abrir Tela OBS (Output)** (`http://localhost:3000/output.html`)
-   * **🧼 Abrir Saída Clean Feed** (`http://localhost:3000/output.html?clean=1`)
-   * **📱 Abrir Link do Repórter Remoto** (`http://localhost:3000/guest.html?guest=Reporter1`)
-   * **Copiar URL** pronta para colar na *Fonte de Navegador (Browser Source)* do OBS Studio.
+3. Uma janela gráfica de controle se abrirá iniciando automaticamente o servidor local na porta `3000` e abrindo o **Painel do Diretor** no seu navegador padrão.
 
-> **Como funciona a portabilidade?** O `WebLiveStudio.exe` já traz todos os módulos HTML, CSS, JavaScript e o servidor HTTP/SSE/Stream Deck embutidos dentro do próprio binário, além de carregar alterações da pasta `public/` caso ela esteja ao lado dele. Se você editar o código-fonte e quiser regerar o executável, basta rodar `npm run build:exe` (`node build-exe.js`).
-
-### Opção B (Apenas para Desenvolvedores via Node.js)
-1. Caso esteja editando o código via Node.js:
-   ```powershell
-   node server.js
-   ```
-   *(ou `npm run build:exe` para recompilar o `WebLiveStudio.exe`)*.
+### Opção C (Servidor Python via Linha de Comando)
+```powershell
+python weblive_server.py
+```
 
 ---
 
@@ -91,10 +89,11 @@ Você **não precisa usar terminal** nem instalar Node.js nos computadores de tr
 * **🖥️ Screen Share (`#39`):** Captura uma janela ou tela inteira do computador e joga automaticamente no layout Picture-in-Picture (`PiP`).
 * **📶 Speedtest (`#41`):** Mede taxa de Upload (Mbps), Latência (`RTT`) e `Jitter` da conexão.
 
-#### C. Fontes de Mídia Web & Playlist (`Core #2`, `#22`)
-* Cole links de **YouTube Embed, Facebook, Instagram ou arquivos MP4/WebM**.
+#### C. Fontes de Mídia Web, Extrator Python `yt-dlp` & Playlist (`Core #2`, `#22`)
+* Cole links de **YouTube, Twitch, Facebook, Instagram ou arquivos MP4/WebM**.
+* Clique em **`🐍 Play via yt-dlp`** para que o backend Python (`weblive_server.py`) extraia o stream direto do vídeo sem bloqueios de embed, ou clique em **`▶ Play Embed`** para reprodução padrão.
 * Clique em **`+ Fila`** para enfileirar vários vídeos na **Playlist (`#22`)**.
-* Use os botões **`▶ Play no Ar`**, **`⏸ Pause`** e **`⏭ Próx. Playlist`** para controlar a reprodução diretamente no OBS.
+* Use os botões **`⏸`** e **`⏭`** para controlar a reprodução diretamente no OBS.
 
 #### D. Câmera Local & Roteamento de Áudio (`Core #6`)
 * Clique em **`Ligar Câmera`** para capturar sua webcam local em 720p/1080p.

@@ -120,7 +120,10 @@ DIRETRIZ OBRIGATÓRIA DE DOCUMENTAÇÃO E MANUTENÇÃO CONTÍNUA:
 | Arquivo | Papel na Arquitetura | Requisitos Atendidos |
 | :--- | :--- | :--- |
 | `package.json` | Manifesto Node.js e script `npm start`. | Setup e execução rápida |
-| `server.js` | Servidor HTTP estático + Barramento SSE (`/api/events`, `/api/sync`) + API Stream Deck + Webhooks. | Sincronia multi-dispositivo, `#33` (Webhooks), `#46` (Stream Deck HTTP API) |
+| `weblive_server.py` | **Motor Broadcast Principal em Python 3**: Servidor HTTP Multithreaded, SSE Hub (`/api/events`), Persistência SQLite3 (`weblive_studio.db`), Extrator `yt-dlp` (`/api/ytdlp`), Streamer `RTMP/FFmpeg` (`/api/rtmp/*`), Proxy RSS Real (`/api/rss`) e API Stream Deck (`#46`). | Conversão completa para Plataforma Profissional Python |
+| `weblive_studio_gui.pyw` | **Estação Desktop Gráfica em Python (`Tkinter`)**: Abre sem terminal, controla servidor Python, RTMP/FFmpeg, Extrator `yt-dlp`, links LAN para celulares e monitora logs SQLite em tempo real. | Operação Desktop Profissional em Python |
+| `requirements.txt` | Dependências Python opcionais/avançadas (`pillow`, `yt-dlp`). | Ambiente Python |
+| `server.js` | Servidor HTTP legado/alternativo em Node.js + SSE + Stream Deck API. | Sincronia multi-dispositivo, `#33` (Webhooks), `#46` (Stream Deck HTTP API) |
 | `public/index.html` | Interface Responsiva do Painel do Diretor (3 colunas, Monitores PVW/PGM, Abas e Mixer). | Core `#1`-`#7`, Topbar com `#20`, `#26`, `#29`, `#30`, `#36`, `#42` |
 | `public/output.html` | Página "Browser Source" 1080p60 para o OBS Studio (suporta parâmetro `?clean=1`). | Core `#2`, `#3`, `#4`, `#5`, `#7`, `#9`, `#25`, `#32`-`#37`, `#43` (Clean Feed) |
 | `public/guest.html` | Interface móvel/web para o Repórter Remoto via WebRTC. | Core `#7` (WebRTC + Retorno PGM + Mix-Minus), `#16`, `#24` (Tally), `#39`, `#41`, `#50` |
@@ -144,6 +147,13 @@ DIRETRIZ OBRIGATÓRIA DE DOCUMENTAÇÃO E MANUTENÇÃO CONTÍNUA:
 * **v1.0.0:** Implementação inicial completa da plataforma **WebLive Studio** (Servidor Node.js SSE/API, Painel do Diretor, Tela Output OBS com Clean Feed, Entrada Remota WebRTC com Mix-Minus, Compositor de Vídeo Canvas 60fps, Engine WebAudio DSP e 50 funções adicionais).
 * **v1.0.1:** Criação do Manual de Instruções de Uso ([`MANUAL_DE_USO.md`](./MANUAL_DE_USO.md)) e inclusão da diretriz obrigatória no Prompt Mestre ([`RELATORIO_E_PROMPT.md`](./RELATORIO_E_PROMPT.md)) exigindo atualização automática do manual e do relatório a cada nova modificação no projeto.
 * **v1.1.0:** Criação do executável portátil nativo **`WebLiveStudio.exe`** ([`launcher/Launcher.cs`](./launcher/Launcher.cs) + [`build-exe.js`](./build-exe.js)). Permite copiar um único arquivo `.exe` para qualquer computador Windows e abrir todo o sistema com duplo clique através de uma janela gráfica própria (sem usar terminal e sem exigir Node.js instalado).
+* **v2.0.0:** Conversão e evolução para **Plataforma de Transmissão Profissional em Python 3** ([`weblive_server.py`](./weblive_server.py) e Estação Desktop Gráfica [`weblive_studio_gui.pyw`](./weblive_studio_gui.pyw)):
+  * **Servidor Broadcast Multithreaded em Python (`ThreadingHTTPServer` + `BroadcastEventHub`)** com sincronização SSE em tempo real.
+  * **Banco de Dados Nativo `SQLite3` (`weblive_studio.db`)** para persistir automaticamente o estado das cenas/projetos e gravar logs de auditoria comercial (`#49`).
+  * **Integração Nativa com `yt-dlp` (`/api/ytdlp`)**: extrai streams diretos e títulos de vídeos/lives do YouTube, Twitch, Instagram e Facebook direto no Painel do Diretor e na GUI Python.
+  * **Motor de Transmissão Direta `RTMP / FFmpeg` (`/api/rtmp/start` e `/api/rtmp/stop`)**: permite iniciar pipelines de streaming para YouTube Live / Twitch / Facebook tanto pela GUI Desktop Python quanto pela aba de Automação do Diretor.
+  * **Extrator Real de Feed RSS em Python (`/api/rss`)** via `urllib` + `xml.etree.ElementTree`, contornando restrições de CORS para alimentar o Ticker Tape (`#7` e `#37`) com notícias reais ao vivo.
+  * **Recompilação do `WebLiveStudio.exe`** com todos os novos controles de interface embutidos.
 
 ---
 

@@ -1,4 +1,7 @@
 node_modules/
+__pycache__/
+*.pyc
+weblive_studio.db
 *.log
 .DS_Store
 Thumbs.db
