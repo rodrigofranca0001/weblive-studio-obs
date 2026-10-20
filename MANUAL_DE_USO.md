@@ -1,170 +1,259 @@
-# 📘 Manual de Instruções de Uso — WebLive Studio (Pro Switcher & OBS Overlay)
+# 📘 Manual de Instruções de Uso — WebLive Studio Pro v3.1 (Estação Desktop Nativa)
 
 > **Regra de Governança:** Este manual faz parte da documentação viva do projeto e **deve ser atualizado obrigatoriamente a cada nova modificação, recurso ou ajuste de interface** realizado no sistema.
 
 ---
 
-## 1. Visão Geral do Sistema (Aplicação Desktop Nativa — Sem Navegador!)
+## 1. Visão Geral
 
-O **WebLive Studio Pro v3.0** é um software desktop nativo completo de Produção Ao Vivo, Switcher (PVW/PGM), Geração de Caracteres (GC), Mixagem de Áudio Multi-pista com **Mix-Minus** e Chamada Remota **WebRTC**, construído como um **aplicativo de janela própria em Python (`weblive_studio_gui.pyw`) e Executável Nativo (`WebLiveStudio.exe`)**, **sem abrir páginas HTML no navegador**.
+O **WebLive Studio Pro v3.1** é um programa de produção ao vivo para Windows (estilo vMix / OBS Studio) que roda em **janela própria**, sem abrir páginas no navegador, com **todos os menus e botões em Português-BR**.
 
-### Como o Software Opera (100% Desktop Nativo):
-* **Janela Principal do Estúdio (`WebLiveNativeStudioApp`)**: Contém os monitores nativos **PREVIEW (PVW)** e **PROGRAM (PGM)** renderizados em tempo real, seletor de cenas, barra de transições (`CUT`, `AUTO`, `STINGER`, `REPLAY`), Whiteboard interativo, abas de GC/Placar/Vídeo/Social/Automação e o **Audio Mixer Multi-pista** com VU Meters nativos.
-* **Janela de Projetor Nativo para OBS (`📺 Abrir Projetor Nativo OBS`)**: Abre uma segunda janela dedicada de vídeo limpo em alta definição que você pode capturar diretamente no OBS Studio usando **"Captura de Janela" (Window Capture)** ou enviar em Tela Cheia (`F11` / Duplo Clique) para um segundo monitor/placa de captura HDMI.
-* **Janela Clean Feed (`🧼 Abrir Janela Clean Feed #43`)**: Abre uma janela nativa de vídeo puro sem gráficos, tarjetas ou placar.
+Ele pega **câmeras e vídeos reais**, monta o **PROGRAMA** (a imagem que vai ao ar) em **1280x720 a 30 quadros por segundo** com tarjetas, placar, notícias e demais gráficos, e entrega esse resultado de três formas:
 
----
+* **Projetor / Saída Limpa** — janelas que o OBS Studio captura com "Captura de Janela";
+* **Gravação de segurança** — arquivo `.mkv` no computador;
+* **Transmissão direta** — RTMP para YouTube, Twitch ou Facebook, sem precisar do OBS.
 
-## 2. Como Abrir o Programa (Sem Terminal e Sem Abrir Navegador HTML)
+### 1.1. O que já é real e o que ainda não é
 
-### Opção A: Duplo Clique em `WebLiveStudio.exe` (Portátil Universal)
-1. Dê um **duplo clique em `WebLiveStudio.exe`**.
-2. Ele abrirá diretamente a **Estação Desktop Nativa v3.0** em janela própria do sistema operacional (sem abrir Chrome/Edge e sem abrir tela preta de terminal).
-   * Se estiver na máquina com Python, ele inicia automaticamente a estação completa `weblive_studio_gui.pyw` via `pythonw.exe`.
-   * Se você copiar apenas o `WebLiveStudio.exe` para outro PC Windows que não tenha Python instalado, ele abre a **Estação Switcher Nativa WinForms C#** embutida dentro do próprio `.exe`!
-
-### Opção B: Duplo Clique Direto em `weblive_studio_gui.pyw`
-1. Dê um **duplo clique no arquivo `weblive_studio_gui.pyw`**.
-2. A estação nativa Python abrirá imediatamente.
-
----
-
-## 3. Como Capturar no OBS Studio (Captura de Janela Nativa)
-
-1. Na barra superior do programa **WebLive Studio Pro v3.0**, clique no botão azul **`📺 Abrir Projetor Nativo OBS (Saída PGM)`** (ou **`🧼 Abrir Janela Clean Feed (#43)`**).
-2. No **OBS Studio**, vá em **Fontes (Sources)** $\rightarrow$ clique em **`+`** $\rightarrow$ escolha **Captura de Janela (Window Capture)**.
-3. Selecione a janela **`[pythonw.exe]: 📺 WebLive Studio Output — PROGRAM OUTPUT`** (ou `[WebLiveStudio.exe]`).
-4. *(Dica)*: Você também pode dar **duplo clique** ou apertar **`F11`** dentro da janela do Projetor Nativo para deixá-la em **Tela Cheia (Fullscreen Projector)** em um segundo monitor!
+| Área | Situação na v3.1 |
+| :--- | :--- |
+| Câmeras (webcam, celular como "Câmera Virtual do Windows", OBS Virtual Camera) | ✅ Real, até 2 câmeras, com reconexão automática |
+| Vídeo do computador ou de link (yt-dlp) | ✅ Real (imagem; **sem som** por enquanto) |
+| Monitores PRÉVIA / NO AR, transições Corte Seco / Suave / Vinheta | ✅ Real |
+| Gráficos (tarjeta, placar, notícias, código QR, enquete, meta, doação, clima, contagem, desenho na tela) | ✅ Real, desenhados no próprio vídeo |
+| Replay em câmera lenta | ✅ Real (últimos 5 segundos do programa, a 50% da velocidade) |
+| Notícias (RSS), Clima e Teste de Internet | ✅ Dados reais da internet |
+| Gravação local e Transmissão RTMP | ✅ Real (exigem FFmpeg) |
+| API do Stream Deck e alertas de doação por webhook | ✅ Chegam à estação desktop |
+| **Áudio** (mesa de som, medidores, efeitos, talkback, abaixar trilha, corte por voz) | ⚠️ **Ainda não processa som.** A transmissão sai com **áudio em silêncio** |
+| **Repórter pelo celular (WebRTC)** | ⚠️ O vídeo do celular **ainda não entra** no PROGRAMA da estação desktop (aparece "SEM SINAL") |
+| Estação de reserva embutida no `.exe` (PC sem Python) | ⚠️ Apenas demonstrativa: não usa câmeras nem grava |
 
 ---
 
-## 4. Guia Passo a Passo do Painel do Diretor (`index.html`)
+## 2. Instalação (primeira vez)
 
-### 4.1. Barra Superior (Topbar)
-* **🕒 Relógio Broadcast (`#26`):** Exibe a hora exata com seletor de fuso horário (`BRT`, `UTC`, `EST`, `WET`).
-* **⚡ Monitoramento de Saúde (`#42`):** Mostra taxa de quadros (`FPS`), uso estimado de `CPU` e consumo de `RAM` do navegador em tempo real.
-* **🎬 Seletor de Perfil de Usuário (`#29`):** Permite alternar a visão e permissões entre:
-  * **Diretor Geral:** Acesso total a cenas, vídeo, áudio, GC e automação.
-  * **Operador de GC:** Foco nas abas de Tarjetas, Placar, Ticker, Enquetes e Chat.
-  * **Operador de Áudio:** Foco no Mixer Multi-pista, Soundboard, Roteamento e Call WebRTC.
-* **🔇 Botão PANIC MUTE (`#20`):** Corta instantaneamente todo o áudio do barramento Master em caso de emergência.
-* **🌙 Tema (`#30`):** Alterna entre o **Dark Mode** (padrão para estúdios escuros) e **Light Mode**.
+1. Instale o **Python 3.12 ou mais novo** (python.org), marcando *"Add Python to PATH"*.
+2. Na pasta do programa, abra o terminal e instale as bibliotecas:
+   ```powershell
+   python -m pip install -r requirements.txt
+   ```
+   (Pillow, OpenCV, NumPy, yt-dlp e qrcode.)
+3. Instale o **FFmpeg** (necessário para gravar e transmitir):
+   ```powershell
+   winget install Gyan.FFmpeg
+   ```
+   Alternativa: copie o `ffmpeg.exe` para a pasta do programa.
 
----
-
-### 4.2. Coluna Esquerda: Cenas, WebRTC, Mídia Web e Câmera Local
-
-#### A. Gerenciamento de Cenas (`Core #1`, `#21`, `#44`)
-* **1 Clique na Cena:** Envia a cena para o monitor ** verde PREVIEW (PVW)**.
-* **Duplo Clique na Cena:** Envia e corta imediatamente para o **vermelho PROGRAM (NO AR)**.
-* **Atalhos de Teclado (`#21`):**
-  * Teclas `1` a `6`: Selecionam as cenas 1 a 6 no Preview.
-  * Tecla `Espaço (Space)`: Executa o corte imediato (**CUT**) entre Preview e Program.
-* **🔒 Lock (`#44`):** Quando marcado, bloqueia qualquer troca acidental de cena durante momentos críticos.
-* **Botão `+ Cena`:** Cria novas cenas personalizadas em tempo real.
-
-#### B. Entrada Remota WebRTC com Mix-Minus (`Core #7`, `#16`, `#24`, `#39`, `#41`, `#50`)
-* **Copiar / Abrir Link:** Envie o link `guest.html?guest=Reporter1` para o celular ou notebook do repórter/convidado.
-* **Retorno com Mix-Minus Automático:** Assim que o convidado clica em *"Entrar Ao Vivo"*, ele vê o retorno do Program e ouve todas as fontes da live **exceto a própria voz**, eliminando eco.
-* **🎙️ Segure p/ Talkback (`#16`):** Enquanto o diretor mantém este botão pressionado, sua voz vai exclusivamente para o fone do repórter (com indicação visual na tela dele) **sem sair no ar (OBS)**.
-* **🖥️ Screen Share (`#39`):** Captura uma janela ou tela inteira do computador e joga automaticamente no layout Picture-in-Picture (`PiP`).
-* **📶 Speedtest (`#41`):** Mede taxa de Upload (Mbps), Latência (`RTT`) e `Jitter` da conexão.
-
-#### C. Fontes de Mídia Web, Extrator Python `yt-dlp` & Playlist (`Core #2`, `#22`)
-* Cole links de **YouTube, Twitch, Facebook, Instagram ou arquivos MP4/WebM**.
-* Clique em **`🐍 Play via yt-dlp`** para que o backend Python (`weblive_server.py`) extraia o stream direto do vídeo sem bloqueios de embed, ou clique em **`▶ Play Embed`** para reprodução padrão.
-* Clique em **`+ Fila`** para enfileirar vários vídeos na **Playlist (`#22`)**.
-* Use os botões **`⏸`** e **`⏭`** para controlar a reprodução diretamente no OBS.
-
-#### D. Câmera Local & Roteamento de Áudio (`Core #6`)
-* Clique em **`Ligar Câmera`** para capturar sua webcam local em 720p/1080p.
-* No seletor **Fonte de Áudio**, escolha entre o áudio embutido da câmera, um microfone externo USB/XLR ou desativar o áudio da câmera.
+> Se faltar alguma biblioteca, o programa mostra uma janela avisando qual instalar. Se faltar o FFmpeg, o rodapé da janela avisa e os botões de gravar/transmitir explicam o que fazer.
 
 ---
 
-### 4.3. Coluna Central: Monitores PVW/PGM, Transições e Abas de Produção
+## 3. Como Abrir o Programa
 
-#### A. Barra de Transições & Ferramentas de Tela
-* **✂️ CUT:** Troca imediata entre Preview e Program.
-* **✨ AUTO:** Transição suave entre Preview e Program.
-* **⚡ STINGER (`Core #3`):** Dispara a animação de transição com logo personalizado (armazenado no `IndexedDB` local) + efeito sonoro de vinheta.
-* **⏪ REPLAY (`#8`):** Reproduz instantaneamente os últimos **10 segundos** gravados continuamente no buffer circular de memória.
-* **📏 Grid `#47`:** Ativa as linhas-guia magnéticas (Snap Grid) sobre os monitores Preview e Program para alinhamento visual perfeito.
-* **✏️ Desenhar na Tela — Whiteboard (`#40`):** Marque a caixa, escolha a cor e desenhe livremente com o mouse ou touch sobre o monitor **PROGRAM** (o traço aparece em tempo real na tela do OBS, estilo comentarista esportivo). Clique em **`Limpar Desenho`** para apagar.
-* **⏳ Countdown Live (`#25`):** Exibe ou oculta a tela regressiva gigante de início de transmissão no OBS.
-* **⏺️ Gravar Backup Local (`#27`):** Inicia a gravação local da saída Program via `MediaRecorder API` e baixa automaticamente o arquivo `.webm` no PC do diretor ao parar.
+* **Opção A — `WebLiveStudio.exe`:** duplo clique. Com o Python instalado, ele abre a estação completa (`weblive_studio_gui.pyw`) sem janela de terminal.
+* **Opção B — `weblive_studio_gui.pyw`:** duplo clique direto no arquivo.
 
-#### B. Aba 1 — 🏷️ GC, Placar & Ticker (`Core #4`, `Core #5`, `#7`, `#37`)
-* **Tarjeta / Lower Third (`Core #5`):**
-  * Preencha Nome/Manchete e Cargo/Subtítulo.
-  * Escolha entre **Fixa (Permanente)** ou **Temporária (5s ou 8s)** — no modo temporário ela entra animada, permanece pelo tempo escolhido e sai sozinha.
-* **Placar Esportivo & Cronômetro (`Core #4`):**
-  * Altere os nomes das equipes e a pontuação (atualização instantânea no ar).
-  * Controle o cronômetro da partida com **`Iniciar/Pausar`** e **`Zerar`**.
-* **Ticker / Crawl (`#7`) & Feed RSS (`#37`):**
-  * Digite avisos contínuos para a barra inferior estilo telejornal ou clique em **`📡 Puxar Feed RSS (#37)`** para carregar manchetes automáticas.
-
-#### C. Aba 2 — 🎨 Vídeo, PiP, Grid & Chroma (`#1` a `#6`, `#10`)
-* **Seletor de Layout:** Alterne entre *Câmera Única*, *Picture-in-Picture (PiP `#1`)*, *Multi-view Grid 4 Convidados (`#2`)* ou *Multi-view Grid 8 Convidados (`#2`)*.
-* **Backgrounds Dinâmicos (`#10`):** Escolha entre *Cyber Grid*, *Telejornal* ou *Arena Esportiva*.
-* **Chroma Key (`#3`):** Ative a remoção de fundo verde em tempo real e ajuste o controle deslizante de **Tolerância**.
-* **Correção de Cor (`#5`) & Recorte Crop (`#4`):** Ajuste Brilho, Contraste, Saturação e recorte de bordas em tempo real.
-* **Upload de Stinger / Logo (`Core #3` e `#6`):** Selecione uma imagem/logo do seu computador para salvá-la no `IndexedDB` local; ela passa a ser exibida na **Marca d'água (`#6`)** e na transição **Stinger (`Core #3`)** sem gastar banda de internet.
-
-#### D. Aba 3 — 💬 Chat, Enquetes, Meta & QR (`#9`, `#31` a `#38`)
-* **Chat Ao Vivo (`#31`) + Filtro de Palavrões (`#38`) + Destaque (`#35`):**
-  * Com o **Filtro de Palavrões (`#38`)** ativo, termos inadequados são substituídos por `****`.
-  * Clique em **`Destacar (#35)`** ou no botão **`No Ar`** de qualquer mensagem para jogá-la animada na tela do OBS.
-* **QR Code Ao Vivo (`#9`):** Digite qualquer URL ou chave Pix e clique em **`QR No Ar (#9)`** para gerar e exibir o QR Code na tela.
-* **Enquete Ao Vivo (`#32`):** Exibe o gráfico dinâmico de votação em barras com atualização em tempo real (`+Voto A` / `+Voto B`).
-* **Barra de Meta (`#34`):** Exibe a barra de progresso de inscritos/doações.
-* **Simular Superchat (`#33`):** Dispara um alerta animado de doação no centro da tela com efeito sonoro (também acionável via Webhook externo).
-* **Clima (`#36`):** Exibe ou oculta o widget de previsão do tempo no canto superior.
-
-#### E. Aba 4 — ⚙️ Automação, Agendamento, JSON & Logs (`#28`, `#45`, `#46`, `#49`)
-* **Agendamento de Eventos (`#28`):** Defina um horário (`HH:MM:SS`) e escolha qual cena deve entrar automaticamente no ar com transição Stinger.
-* **Exportar / Importar Projeto JSON (`#45`):** Salve todas as cenas, textos de GC, placar e configurações visuais em um arquivo `.json` ou carregue um projeto salvo anteriormente.
-* **Histórico / Log de Ações (`#49`):** Consulta em tempo real tudo o que foi ao ar com carimbo de horário e permite exportar um relatório auditável em **CSV** (`Baixar CSV`).
+Ao abrir, a **Câmera 1** liga sozinha no primeiro dispositivo (a luz da webcam acende). O driver leva de 3 a 6 segundos para entregar a imagem; até lá o vídeo mostra **"SEM SINAL • conectando..."**.
 
 ---
 
-### 4.4. Coluna Direita: Audio Mixer Multi-Pista & Soundboard (`#11` a `#19`, `#23`, `#48`)
-* **Canais Independentes (`#11`):** Controle de volume individual com barra **VU Meter** colorida em tempo real para *Apresentador*, *Repórter WebRTC*, *Mídia Web* e *Soundboard*.
-* **🎧 PFL — Pre-Fader Listen (`#18`):** Permite ao diretor escutar a fonte em seu fone antes de abrir o fader para o público.
-* **Pan (`#19`) & Delay (`#17`):** Ajuste o balanço estéreo Esquerda/Direita (`-1.0` a `+1.0`) e o atraso em milissegundos (`0` a `900ms`) para corrigir sincronia labial (*Lip-Sync*).
-* **🦆 Audio Ducking (`#14`):** Quando marcado, reduz automaticamente o volume da música/mídia sempre que o apresentador ou repórter fala.
-* **🗣️ Auto-Switch p/ Voz (`#23`):** Quando marcado, o sistema detecta automaticamente quem está falando no momento e corta a câmera para essa pessoa.
-* **🎹 MIDI (`#48`):** Conecta controladoras USB MIDI físicas via *Web MIDI API* para controlar os faders de volume usando potenciômetros reais.
-* **🔊 Soundboard (`#15`):** Botões de disparo rápido para *Aplausos*, *Vinheta TV*, *Alerta Urgente* e *Beep Timer*.
+## 4. Primeiros Passos (roteiro rápido)
+
+1. **Escolha as câmeras** em *📷 Câmeras e Fontes de Vídeo* (coluna esquerda).
+2. **Monte a cena em PRÉVIA:** clique numa cena (ou teclas `1` a `6`) e ajuste na aba *🎨 Vídeo, Mosaico e Fundo Verde* a disposição, a fonte principal e a fonte da janela sobreposta.
+3. **Coloque no ar:** `✂️ CORTAR` (ou `Espaço`), `✨ SUAVE` ou `⚡ VINHETA`.
+4. **Gráficos:** aba *🏷️ Tarjetas, Placar e Notícias* e aba *💬 Bate-Papo, Enquete, Meta e Código QR*.
+5. **Saída:** abra o projetor para o OBS, grave uma cópia local e/ou transmita direto.
 
 ---
 
-## 5. Integrações Externas (Stream Deck HTTP API `#46` & Webhooks `#33`)
+## 5. A Tela Principal
 
-### 5.1. Comandos HTTP para Elgato Stream Deck / Bitfocus Companion (`#46`)
-Configure botões do tipo *Website / GET Request* no seu Stream Deck apontando para:
-* **Trocar direto para uma Cena (ex: Cena 1 a 6):**
-  `http://localhost:3000/api/streamdeck?action=scene&target=1`
-* **Executar Corte Seco (CUT):**
-  `http://localhost:3000/api/streamdeck?action=cut`
-* **Disparar Transição Stinger:**
-  `http://localhost:3000/api/streamdeck?action=stinger`
+### 5.1. Barra de Menus
+* **Arquivo:** nova cena, salvar/abrir projeto (.JSON), abrir vídeo do computador, iniciar/parar gravação, abrir a pasta das gravações, sair.
+* **Cenas e Cortes:** corte seco, transição suave, vinheta, replay e seleção direta das cenas.
+* **Gráficos na Tela:** liga/desliga cada gráfico e busca notícias reais.
+* **Áudio e Efeitos:** botão de pânico e efeitos sonoros (bipes locais por enquanto).
+* **Saídas para OBS e Transmissão:** projetores e transmissão direta.
+* **Ajuda:** como capturar no OBS, como transmitir direto e informações do programa.
 
-### 5.2. Webhook para Alertas de Doação / Superchat (`#33`)
-Qualquer serviço externo pode disparar alertas na tela enviando um `GET` ou `POST` para:
+### 5.2. Barra Superior
+* **🕒 Relógio (#26)** — hora local.
+* **Perfil (#29)** — Diretor Geral, Operador de Caracteres (GC) ou Operador de Som (por enquanto só registra no histórico).
+* **🔇 Silenciar Tudo (#20)** — botão de pânico (passa a cortar o som de verdade quando o áudio real estiver implementado).
+* **📺 Abrir Projetor para OBS** e **🧼 Abrir Janela Saída Limpa (#43)** — veja a seção 6.
+
+### 5.3. Coluna Esquerda
+
+#### A. Cenas e Atalhos (#21, #44)
+* **Clique numa cena** → ela vai para a **PRÉVIA** (monitor verde).
+* **Teclas `1` a `6`** selecionam as cenas; **`Espaço`** corta para o ar. Os atalhos não disparam enquanto você digita num campo.
+* **🔒 Travar Cena (#44)** impede qualquer troca acidental.
+* **+ Nova Cena** cria uma cena personalizada (começa com a Câmera 1 em tela cheia).
+
+#### B. Câmeras e Fontes de Vídeo
+* **Câmera 1** e **Câmera 2**: escolha o dispositivo na lista (webcam, celular conectado pelo *Link para o Celular* do Windows, OBS Virtual Camera...). Use **(desligada)** para soltar o dispositivo.
+* Abaixo de cada uma aparece o estado real: `ao vivo 1280x720 • 20 fps`, `conectando...` ou `sinal perdido (reconectando...)`.
+* **🔄 Procurar Câmeras** atualiza a lista (útil ao plugar uma câmera nova).
+* Um mesmo dispositivo não pode ser usado nas duas entradas ao mesmo tempo.
+
+#### C. Convidado Remoto (#7, #16, #41)
+* **📋 Copiar Link do Celular** — link da página do repórter (`guest.html`). ⚠️ Por enquanto o vídeo do celular só funciona com o Painel Web (seção 11); na estação desktop a fonte *Repórter (celular)* aparece como "SEM SINAL".
+* **📶 Testar Internet (#41)** — teste real (~15 s) de download, envio e latência. Para transmitir em 720p30 é recomendado **envio de 6 Mbps ou mais**.
+* **🎙️ Segure para Falar com o Repórter (#16)** — sinaliza o talkback para a página do repórter (a voz ainda não é enviada).
+
+#### D. Vídeos (Internet ou Computador) e Fila (#22)
+* **🐍 Carregar Link** — cole um link (YouTube, Twitch, Vimeo, arquivo .mp4 na internet...) e o yt-dlp abre o vídeo no canal **MÍDIA**.
+* **📂 Do Computador** — abre um vídeo do PC (.mp4, .mov, .mkv, .webm, .avi...).
+* **⏸ Pausar / ▶ Continuar** — controla a reprodução.
+* **+ Adicionar à Fila** e **⏭ Próximo** — monta e percorre a fila de vídeos. Com **Avançar sozinho** marcado, ao terminar um vídeo o próximo da fila entra automaticamente; desmarcado, o vídeo repete.
+* O canal MÍDIA ainda **não toca o som** do vídeo.
+* **YouTube pedindo login:** veja a seção 9.
+
+### 5.4. Coluna Central
+
+#### A. Monitores e Transições
+* **🟢 PRÉVIA (PREPARAÇÃO)** — a próxima cena, sem gráficos. **🔴 NO AR (PROGRAMA)** — exatamente o que está saindo.
+* **✂️ CORTAR [Espaço]** — troca imediata.
+* **✨ SUAVE** — mistura gradual (0,6 s) entre a cena atual e a nova.
+* **⚡ VINHETA** — painel animado atravessa a tela e a cena troca no meio do efeito.
+* **⏪ REPLAY (#8)** — repete em câmera lenta os **últimos 5 segundos** do programa, com o selo "REPLAY • CÂMERA LENTA", e volta ao vivo sozinho.
+* **📏 Grade #47** — linhas-guia e área segura **só nos monitores** (não vão para o ar).
+* **✏️ Desenhar na Tela Ao Vivo (#40)** — marque a caixa e desenhe com o mouse sobre o monitor NO AR; o traço sai no vídeo. **🎨 Escolher Cor** e **🗑️ Limpar Desenho**.
+* **⏳ Contagem Regressiva (#25)** — tela cheia "A TRANSMISSÃO COMEÇA EM 03:00" (reinicia em 3 minutos ao reabrir depois de zerar).
+* **⏺️ Gravar Cópia Local (#27)** — veja a seção 8.
+
+#### B. Aba 🏷️ Tarjetas, Placar e Notícias
+* **Tarjeta (#5):** nome e cargo; **Fixa** ou **Temporária (5 ou 8 segundos)**. Entra e sai deslizando.
+* **Placar (#4):** times, pontos (atualizam na hora), cronômetro com *Iniciar / Pausar* e *Zerar Tempo*.
+* **Barra de Notícias (#7/#37):** texto rolante digitado à mão, ou **📡 Buscar Notícias (#37)** para puxar manchetes reais do **Endereço do feed RSS** (padrão: g1). Aceita RSS e Atom.
+
+#### C. Aba 🎨 Vídeo, Mosaico e Fundo Verde (#1-#10)
+Os ajustes da esquerda valem para a **cena que está na PRÉVIA**:
+* **Disposição das Câmeras:** *Câmera Única (Tela Cheia)*, *Janela Sobreposta (PiP)*, *Mosaico 4 Câmeras* ou *Mosaico 8 Câmeras*.
+  * Os mosaicos usam a ordem fixa: Câmera 1, Câmera 2, Mídia, Repórter (o mosaico 8 tem 4 espaços livres).
+* **Fundo Animado (#10):** aparece onde a imagem não cobre a tela (bordas, mosaico, fundo verde).
+* **Fonte Principal** e **Fonte da Janela Sobreposta:** Câmera 1, Câmera 2, Mídia / Vídeo ou Repórter (celular).
+* **Remover Fundo Verde (#3)** + **Sensibilidade:** chroma key real nas câmeras (o fundo verde vira o fundo animado).
+* **Tamanho da Janela Sobreposta (#1):** de 15% a 45% da tela.
+
+Os ajustes da direita valem para **todas as câmeras**: **Brilho**, **Contraste**, **Saturação** (#5), **Recorte da Borda Superior** (#4) e o **Texto da Marca d'água** (#6, canto superior direito; deixe vazio para ocultar).
+
+#### D. Aba 💬 Bate-Papo, Enquete, Meta e Código QR
+* **Comentário em Destaque (#35):** preencha autor e mensagem e clique em *Exibir Comentário em Destaque*. Com o filtro (#38) ligado, palavrões conhecidos viram `****`.
+* **Alerta de Doação (#33):** o botão manual usa o autor e a mensagem acima. Alertas automáticos chegam pela API (seção 10).
+* **Código QR (#9):** QR real e escaneável do endereço digitado.
+* **Enquete (#32):** defina as duas opções, some votos com *+Voto Opção A / B* e use *Zerar Votos*.
+* **Meta (#34):** informe o valor atual e o alvo.
+* **Clima (#36):** digite a cidade e clique em *🌤️ Clima*; a temperatura real (Open-Meteo) entra no ar e se atualiza a cada 15 minutos.
+
+#### E. Aba ⚙️ Transmissão, Agendador e Histórico
+* **Transmissão direta:** veja a seção 7.
+* **Trocar Cena às (HH:MM:SS) (#28):** agenda a cena da PRÉVIA para entrar com vinheta no horário.
+* **Salvar / Abrir Projeto (.JSON) (#45):** cenas, tarjeta e barra de notícias. Projetos da v3.0 são convertidos automaticamente.
+* **Histórico (#49):** tudo o que foi feito, com horário (também gravado no banco `weblive_studio.db`).
+
+### 5.5. Coluna Direita: Mesa de Som e Efeitos
+⚠️ **Ainda sem áudio real.** Os controles (volume, escuta, balanço, atraso, mudo, abaixar trilha, corte por voz) já estão na tela, mas ainda não processam som. Os medidores ficam vazios de propósito, para não indicar um sinal que não existe. Os **efeitos sonoros** tocam bipes só no alto-falante deste PC.
+
+### 5.6. Barra de Status (rodapé)
+Mostra os **quadros por segundo reais da saída** (o normal é 30), o **uso de processador** do programa, **⏺ GRAVANDO mm:ss** e **📡 AO VIVO mm:ss**, além de avisar se o FFmpeg não foi encontrado.
+
+---
+
+## 6. Como Capturar no OBS Studio (Captura de Janela)
+
+1. Clique em **📺 Abrir Projetor para OBS (Saída no Ar)** (ou **🧼 Abrir Janela Saída Limpa (#43)** para o vídeo sem gráficos).
+2. No OBS: **Fontes → + → Captura de Janela**.
+3. Escolha a janela **`📺 WebLive Studio — SAÍDA PRINCIPAL`** (ou `SAÍDA LIMPA`).
+4. Dica: **duplo clique** ou **F11** no projetor deixa em tela cheia (útil num segundo monitor). **Esc** sai da tela cheia.
+
+---
+
+## 7. Transmissão Direta (YouTube / Twitch / Facebook)
+
+1. Aba **⚙️ Transmissão, Agendador e Histórico**.
+2. **Servidor:** endereço RTMP da plataforma, por exemplo:
+   * YouTube: `rtmp://a.rtmp.youtube.com/live2`
+   * Twitch: `rtmp://live.twitch.tv/app`
+   * Facebook: `rtmps://live-api-s.facebook.com:443/rtmp/`
+3. **Chave:** a chave de transmissão do painel da plataforma. Ela fica oculta na tela e **nunca é gravada no histórico**.
+4. **🚀 Iniciar Transmissão.** Vai ao ar o PROGRAMA real (1280x720, 30 qps, H.264 4,5 Mbps) com uma **trilha de áudio em silêncio**, exigida pelas plataformas, até o áudio real existir.
+5. Se a plataforma recusar (chave errada, internet caiu...), o programa avisa com a mensagem do FFmpeg e o botão volta a *Iniciar*.
+6. **⏹️ Parar Transmissão** encerra.
+
+---
+
+## 8. Gravação de Segurança (#27)
+
+* **⏺️ Gravar Cópia Local** grava o PROGRAMA (com gráficos) em `gravacoes/WebLive_AAAA-MM-DD_HH-MM-SS.mkv` (H.264, 1280x720, 30 qps, **sem áudio** por enquanto).
+* **⏹️ Parar Gravação** finaliza o arquivo. O histórico mostra o nome e o tamanho.
+* **Arquivo → Abrir Pasta das Gravações** abre a pasta.
+* O formato `.mkv` não se perde se o PC desligar no meio. Para converter em `.mp4`: `ffmpeg -i arquivo.mkv -c copy arquivo.mp4`.
+* Gravação e transmissão podem rodar ao mesmo tempo. Ao fechar o programa com alguma delas ativa, ele pergunta antes e finaliza o arquivo corretamente.
+
+---
+
+## 9. Vídeos do YouTube que Pedem Login
+
+O YouTube frequentemente bloqueia programas com a mensagem *"confirme que você não é um robô"*. Para liberar:
+1. No navegador em que você está logado no YouTube, instale a extensão **"Get cookies.txt LOCALLY"**.
+2. Abra o youtube.com, exporte os cookies e salve o arquivo como **`cookies.txt`** na pasta do WebLive Studio.
+3. Carregue o link de novo.
+
+> ⚠️ O `cookies.txt` dá acesso à sua conta: não compartilhe. Ele já está no `.gitignore` e nunca vai para o GitHub.
+
+---
+
+## 10. Integrações (Stream Deck #46 e Alertas #33)
+
+O programa abre um servidor local na porta **3000** (ou na próxima livre). Os comandos agem **direto na estação desktop**.
+
+### 10.1. Stream Deck / Bitfocus Companion (#46)
+Configure botões do tipo *Website / GET Request*:
+
+| Ação | Endereço |
+| :--- | :--- |
+| Cortar direto para a cena N | `http://localhost:3000/api/streamdeck?action=scene&target=1` |
+| Só colocar a cena N na PRÉVIA | `http://localhost:3000/api/streamdeck?action=preview&target=2` |
+| Corte seco | `http://localhost:3000/api/streamdeck?action=cut` |
+| Transição suave | `http://localhost:3000/api/streamdeck?action=auto` |
+| Vinheta | `http://localhost:3000/api/streamdeck?action=stinger` |
+| Replay | `http://localhost:3000/api/streamdeck?action=replay` |
+| Mostrar / ocultar tarjeta | `http://localhost:3000/api/streamdeck?action=gc` |
+| Mostrar / ocultar placar | `http://localhost:3000/api/streamdeck?action=placar` |
+| Mostrar / ocultar notícias | `http://localhost:3000/api/streamdeck?action=ticker` |
+| Iniciar / parar gravação | `http://localhost:3000/api/streamdeck?action=gravar` |
+
+### 10.2. Alertas de Doação por Webhook (#33)
+Qualquer serviço pode disparar o alerta enviando `GET` ou `POST` para:
 ```text
 http://localhost:3000/api/webhook/alert?user=NomeDoApoiador&amount=R$%2050,00&msg=Mensagem%20na%20tela
 ```
 
 ---
 
-## 6. Guia do Repórter / Convidado Remoto (`guest.html`)
-1. O repórter abre o link `http://SEU_IP_OU_DOMINIO:3000/guest.html?guest=Reporter1` no celular (4G/5G ou Wi-Fi).
-2. Antes de entrar, pode clicar em **`Executar Teste de Banda`** (`#41`) para validar Upload, RTT e Jitter.
-3. Clica em **`📡 Entrar Ao Vivo (WebRTC)`** (ou **`🖥️ Compartilhar Tela`** `#39`).
-4. O banner superior funciona como **Tally Light (`#24`)**:
-   * **⚪ STANDBY:** Aguardando.
-   * **🟢 EM PREVIEW:** Diretor selecionou sua câmera no Preview (prepare-se).
-   * **🔴 VOCÊ ESTÁ NO AR! (PROGRAM):** Sua imagem está sendo transmitida ao vivo no OBS.
-5. Caso o 4G oscile, o watchdog de **Auto-Reconexão (`#50`)** renegocia a conexão automaticamente sem travar a tela do OBS.
+## 11. Painel Web e Página do Repórter (modo navegador, legado)
 
+O projeto ainda contém o painel web da v1/v2 (pasta `public/`), servido pelo mesmo servidor local:
+* **Painel do Diretor:** `http://localhost:3000/index.html`
+* **Tela para o OBS (Fonte de Navegador):** `http://localhost:3000/output.html` (Saída Limpa: `?clean=1`)
+* **Repórter pelo celular:** `http://SEU_IP:3000/guest.html?guest=Reporter1`
+
+Nesse modo, o vídeo do repórter (WebRTC, com retorno sem eco) funciona **dentro do Painel Web**. Ele é independente da estação desktop: o que acontece no navegador não aparece nos monitores da estação, e vice-versa. Para usar só o servidor, sem a estação: `python weblive_server.py`.
+
+---
+
+## 12. Solução de Problemas
+
+| Problema | O que fazer |
+| :--- | :--- |
+| "SEM SINAL • conectando..." por mais de 10 s | Feche outros programas que usam a câmera (Teams, Zoom, OBS) e escolha o dispositivo de novo na lista. |
+| Webcam a ~20 qps | Limite do sensor com pouca luz; mais iluminação costuma subir para 30. |
+| Rodapé mostrando bem menos de 30 QPS | Desligue o fundo verde (é o recurso mais pesado) ou feche projetores extras. |
+| "FFmpeg não encontrado" | `winget install Gyan.FFmpeg` e reabra o programa. |
+| Transmissão cai logo após iniciar | Confira servidor e chave; veja o motivo na mensagem de erro e em `gravacoes/ffmpeg_rtmp.log`. |
+| Vídeo do YouTube não carrega | Veja a seção 9 (cookies.txt). |
+| Notícias ou clima indisponíveis | Verifique a internet ou o endereço do feed RSS. |

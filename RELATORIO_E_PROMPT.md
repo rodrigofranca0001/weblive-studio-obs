@@ -110,7 +110,8 @@ DIRETRIZ OBRIGATÓRIA DE DOCUMENTAÇÃO E MANUTENÇÃO CONTÍNUA:
 ## 🛠️ 2. Relatório de Desenvolvimento & Arquitetura Implementada
 
 ### 2.1. Status Geral do Projeto
-* **Status Atual:** Funcional (Versão `1.0.0` completa e validada sintaticamente).
+* **Status Atual:** Versão `3.1.0`. O caminho de **vídeo** é real e foi testado de ponta a ponta: câmera → compositor → monitores/projetor → gravação `.mkv` → RTMP recebido por um servidor de teste. O **áudio** ainda não existe (a transmissão sai com trilha silenciosa), e o vídeo WebRTC do repórter ainda não entra na estação desktop.
+* **Ambiente validado:** Windows 11, Python 3.14, OpenCV 5.0, NumPy 2.5, Pillow 12.3, yt-dlp 2026.08, FFmpeg 9.0 (winget `Gyan.FFmpeg`).
 * **Conta GitHub Vinculada:**
   * **Usuário:** `rodrigofranca0001`
   * **E-mail:** `rodrigofranca126@gmail.com`
@@ -120,8 +121,9 @@ DIRETRIZ OBRIGATÓRIA DE DOCUMENTAÇÃO E MANUTENÇÃO CONTÍNUA:
 | Arquivo | Papel na Arquitetura | Requisitos Atendidos |
 | :--- | :--- | :--- |
 | `package.json` | Manifesto Node.js e script `npm start`. | Setup e execução rápida |
-| `weblive_server.py` | **Motor Broadcast Principal em Python 3**: Servidor HTTP Multithreaded, SSE Hub (`/api/events`), Persistência SQLite3 (`weblive_studio.db`), Extrator `yt-dlp` (`/api/ytdlp`), Streamer `RTMP/FFmpeg` (`/api/rtmp/*`), Proxy RSS Real (`/api/rss`) e API Stream Deck (`#46`). | Conversão completa para Plataforma Profissional Python |
-| `weblive_studio_gui.pyw` | **Estação Desktop Nativa Completa em Python (`Tkinter` + `Pillow` v3.0 — NÃO abre navegador!)**: Software nativo estilo vMix/OBS com Monitores PVW/PGM em tempo real, Janela Nativa de Projetor para Captura de Janela no OBS (`NativeProjectorWindow`), Clean Feed (`#43`), Cenas, Stinger, Replay, Whiteboard (`#40`), GC/Placar/Ticker, Mixer Multi-pista com VU Meters, `yt-dlp`, `RTMP/FFmpeg` e `SQLite3`. | Plataforma Desktop Nativa fora do navegador HTML |
+| `weblive_server.py` | **Servidor Python (só biblioteca padrão)**: HTTP multithread, SSE Hub (`/api/events`), SQLite3 (`weblive_studio.db`), `yt-dlp` (`/api/ytdlp`, com `cookies.txt` opcional), `FFmpegStreamerEngine` (`/api/rtmp/*`, transmite o Program real recebido via `frame_provider`, recusa iniciar sem a estação aberta e nunca expõe a chave), RSS/Atom real (`fetch_rss_headlines`), Clima real Open-Meteo (`fetch_weather`), Speedtest real Cloudflare (`run_speedtest`), API Stream Deck (`#46`) e Webhook (`#33`). | Backend, integrações e dados reais |
+| `weblive_video.py` | **Motor de Vídeo Real (OpenCV + Pillow + NumPy + FFmpeg)**: `CameraSource` (DirectShow, MJPG, reconexão `#50`), `MediaSource` (arquivo/URL, pausa, loop), `ProgramCompositor` (thread própria a 30 qps: layouts single/PiP/mosaico 4-8, chroma key, cor, crop, fade, stinger, replay em câmera lenta com buffer JPEG em thread separada, todos os gráficos, Clean Feed e Preview 640x360), `FFmpegOutput` (pipe rawvideo → `.mkv` ou RTMP/RTMPS/SRT com relógio de parede, detecção de queda e máscara da chave) e `list_video_devices`/`find_ffmpeg`. | Vídeo real do Program, gravação e transmissão |
+| `weblive_studio_gui.pyw` | **Estação Desktop Nativa (Tkinter, 100% Português-BR, barra de menus nativa)**: exibe os quadros reais do compositor nos monitores PRÉVIA/NO AR (16:9) e nos projetores (`NativeProjectorWindow`, Clean Feed `#43`), seleção de câmeras, mídia/fila, edição da cena em PRÉVIA, gráficos, gravação, RTMP, barra de status real (QPS/CPU/REC/AO VIVO), fila de UI thread-safe (`_ui`) e consumo dos eventos do servidor (Stream Deck/Webhook). Mixer de áudio presente só como interface. | Plataforma Desktop Nativa fora do navegador HTML |
 | `WebLiveStudio.exe` | **Executável Portátil Desktop v3.0**: Inicia automaticamente a Estação Nativa Python (`weblive_studio_gui.pyw` via `pythonw.exe` sem terminal e sem navegador) ou executa sua própria **Estação Switcher Nativa WinForms C# (`NativeStudioForm`)** caso copiado sozinho para um PC sem Python! | Portabilidade 100% Desktop Nativo |
 | `launcher/Launcher.cs` | Código-fonte C# WinForms contendo o Switcher Desktop Nativo (`NativeStudioForm` + `ProjectorForm`) e inicializador silencioso de `pythonw.exe`. | GUI Desktop Nativa Windows |
 | `build-exe.js` | Empacotador e compilador automatizado que embute `public/` e gera `WebLiveStudio.exe`. | Build portátil automatizado (`npm run build:exe`) |
@@ -145,6 +147,17 @@ DIRETRIZ OBRIGATÓRIA DE DOCUMENTAÇÃO E MANUTENÇÃO CONTÍNUA:
 * **v3.0.0:** Transformação completa em **Software Desktop Nativo (`WebLiveNativeStudioApp` em `weblive_studio_gui.pyw` e `NativeStudioForm` em `WebLiveStudio.exe`) — SEM abrir páginas HTML no navegador**:
   * Toda a operação (Monitores duplos `PREVIEW` e `PROGRAM` renderizados a 30/60fps, Seletor de Cenas, Transições `CUT`/`AUTO`/`STINGER`/`REPLAY`, Desenho `Whiteboard #40` com o mouse direto no PGM, `Lower Thirds`, `Placar Esportivo`, `Ticker RSS`, `QR Code`, `Enquetes`, `Audio Mixer Multi-pista` com `VU Meters` nativos e `Soundboard`) roda **100% dentro da janela nativa do programa Desktop**.
   * Adicionada **Janela de Projetor Nativo (`NativeProjectorWindow` / `ProjectorForm`)** para Saída Program e Saída Clean Feed (`#43`), permitindo capturar o vídeo diretamente no OBS Studio via **"Captura de Janela" (Window Capture)** ou exibir em Tela Cheia (`F11` / Duplo Clique) em um segundo monitor.
+  * ⚠️ *Nota da revisão v3.1:* na v3.0 os monitores, VU meters, speedtest, gravação, RSS, clima, QR Code e replay eram **simulados** (formas desenhadas, valores fixos, botões que só mudavam de texto), e o RTMP enviava barras de teste ou relatava "sucesso" sem FFmpeg.
+* **v3.1.0:** **Vídeo real de ponta a ponta + interface 100% Português-BR**:
+  * **Interface traduzida para Português-BR** com barra de menus nativa do Windows (Arquivo, Cenas e Cortes, Gráficos na Tela, Áudio e Efeitos, Saídas para OBS e Transmissão, Ajuda), transições `CORTE SECO` / `SUAVE` / `VINHETA` e nomes de layouts/fundos em português.
+  * **Novo motor [`weblive_video.py`](./weblive_video.py):** câmeras reais (até 2, com nomes vindos do DirectShow), vídeo do computador ou de link via yt-dlp (imagem, ainda sem som), compositor real 1280x720 @ 30 qps em thread própria, fade real, vinheta que troca a cena no meio do efeito, replay real (últimos 5 s a 50%), chroma key/cor/crop reais, QR Code real (`qrcode`), etiquetas e telas "SEM SINAL" honestas.
+  * **Saídas reais via FFmpeg:** gravação `.mkv` em `gravacoes/` e transmissão RTMP/RTMPS/SRT do Program real com trilha AAC silenciosa (exigida pelas plataformas); campo de **chave de transmissão** oculto (antes era fixo `live_key`); queda do FFmpeg detectada e informada; chave mascarada em logs e fora do SSE.
+  * **Dados reais:** manchetes RSS/Atom (sem manchetes inventadas no fallback), clima Open-Meteo por cidade (atualiza a cada 15 min), speedtest Cloudflare (download/envio/latência).
+  * **Integrações na estação desktop:** a API do Stream Deck (`scene`, `preview`, `cut`, `auto`, `stinger`, `replay`, `gc`, `placar`, `ticker`, `gravar`) e o webhook de doações agora agem na GUI nativa.
+  * **Honestidade de interface:** VU meters e visualizador de áudio falsos removidos; avisos claros de que áudio, efeitos e vídeo do repórter ainda não funcionam na estação desktop; enquete começa zerada e com opções editáveis; meta com valores editáveis.
+  * **Correções:** layout de PGM agora segue a cena (antes usava um combobox global); atalhos de teclado não disparam ao digitar em Spinbox/Combobox; barra superior não corta mais botões (indicadores foram para a barra de status no rodapé); monitores em 16:9; desenho na tela mapeado à imagem exibida; importação de projetos v3.0 convertida.
+  * **Dependências:** `opencv-python`, `numpy` e `qrcode` adicionados ao `requirements.txt`; `gravacoes/` e `cookies.txt` no `.gitignore`.
+  * **Desempenho medido:** compositor 30 qps parado, 29,8 gravando e 30,2 transmitindo (CPU do app ~13-23%); render de cena PiP caiu de 17,5 ms para 3,2 ms com fundo em cache, caminho rápido para fonte em tela cheia e etiquetas/telas "SEM SINAL" pré-renderizadas.
 
 ---
 
@@ -153,17 +166,21 @@ DIRETRIZ OBRIGATÓRIA DE DOCUMENTAÇÃO E MANUTENÇÃO CONTÍNUA:
 Se você abrir este projeto em uma nova sessão ou outro computador, basta seguir estes passos:
 
 1. **Ler este arquivo (`RELATORIO_E_PROMPT.md`)** para recuperar todo o contexto funcional e arquitetural.
-2. **Iniciar o Servidor Local:**
+2. **Instalar dependências (uma vez):**
    ```powershell
-   node server.js
+   python -m pip install -r requirements.txt
+   winget install Gyan.FFmpeg
    ```
-3. **Acessar os Módulos no Navegador / OBS:**
+3. **Abrir a Estação Desktop (modo principal):** duplo clique em `weblive_studio_gui.pyw` ou `WebLiveStudio.exe` (para ver erros no console: `python weblive_studio_gui.pyw`).
+4. **Modo navegador (legado, opcional):** `python weblive_server.py` (ou `node server.js`) e acessar:
    * **Painel do Diretor:** `http://localhost:3000/index.html`
    * **OBS Browser Source (Com Gráficos):** `http://localhost:3000/output.html`
    * **OBS Clean Feed (Sem Gráficos - `#43`):** `http://localhost:3000/output.html?clean=1`
    * **Link do Repórter WebRTC (`Core #7`):** `http://localhost:3000/guest.html?guest=Reporter1`
-4. **Próximos Passos Evolutivos Sugeridos (Backlog Futuro):**
-   * Integração opcional com servidor TURN dedicado (Coturn) para redes corporativas restritas no WebRTC.
-   * Integração opcional via OAuth com API oficial do YouTube Live Chat / Twitch IRC em `server.js`.
-   * Shaders WebGL 2.0 customizados (GLSL) adicionais para transições 3D e Lutting de cor avançado.
+5. **Próximos Passos (Backlog, em ordem de prioridade):**
+   * **Áudio real:** captura de microfones (ex.: `sounddevice`), mixer com volume/mudo/pan/delay/ducking/pânico, VU meters reais, áudio da mídia (decodificar via FFmpeg) e envio da mixagem ao FFmpeg (gravação e RTMP) sincronizada com o vídeo.
+   * **Repórter WebRTC na estação desktop:** receber o vídeo/áudio do `guest.html` no Python (ex.: `aiortc`) como fonte `guest1`, com tally e mix-minus.
+   * **Estação de reserva C# (`launcher/Launcher.cs`):** hoje é demonstrativa; tornar real ou avisar que exige Python.
+   * Opções de qualidade: 1080p, bitrate e encoder por hardware (`h264_nvenc`/`h264_qsv`/`h264_amf` estão disponíveis no FFmpeg instalado).
+   * Integração opcional com TURN (Coturn), chat real do YouTube/Twitch (#31) e perfis de usuário (#29) com permissões de fato.
 

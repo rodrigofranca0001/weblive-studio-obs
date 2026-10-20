@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ===============================================================================
-WebLive Studio Pro v2.0 — Core Python Broadcast Server & Media Engine
+WebLive Studio Pro v3.1 — Core Python Broadcast Server & Media Engine
 ===============================================================================
 Arquitetura Profissional de Transmissão Ao Vivo em Python 3 (Zero-Dependency Nativo):
   1. Servidor HTTP Multithreaded de Alta Performance (`ThreadingHTTPServer`)
@@ -12,11 +12,11 @@ Arquitetura Profissional de Transmissão Ao Vivo em Python 3 (Zero-Dependency Na
      - Convidados Remotos WebRTC (Sinalização SDP/ICE + Tally Light + Mix-Minus)
   3. Extrator Nativo `yt-dlp` (`/api/ytdlp?url=...`): Converte links do YouTube,
      Twitch, Instagram e Facebook em streams diretos sem bloqueio de iframe!
-  4. Motor de Retransmissão RTMP / SRT via `FFmpeg` (`/api/rtmp/start` & `/api/rtmp/stop`):
-     Permite transmitir diretamente para YouTube Live, Twitch ou Facebook Live.
+  4. Motor de Transmissão RTMP / SRT via `FFmpeg` (`/api/rtmp/start` & `/api/rtmp/stop`):
+     Transmite o vídeo REAL do Program da Estação Desktop para YouTube Live, Twitch ou Facebook Live.
   5. Persistência SQLite Nativa (`weblive_studio.db`): Salva projetos, cenas,
      configurações e histórico auditável de exibições/comerciais (#49).
-  6. Proxy Nativo de Feed RSS (#37) e Clima (#36) sem bloqueio de CORS.
+  6. Feed RSS real (#37), Clima real via Open-Meteo (#36) e Speedtest real (#41).
   7. API REST Customizada para Elgato Stream Deck / Bitfocus Companion (#46).
 """
 
@@ -25,7 +25,6 @@ import os
 import queue
 import socket
 import sqlite3
-import subprocess
 import sys
 import threading
 import time
@@ -127,91 +126,82 @@ class WebLiveDatabase:
 
 class FFmpegStreamerEngine:
     """
-    Motor Python para transmissão direta via FFmpeg (RTMP / SRT / Gravação Master MKV/MP4).
-    Permite que o WebLive Studio transmita direto para YouTube/Twitch/Facebook sem depender
-    exclusivamente do codificador externo, ou atue em conjunto com o OBS Studio.
+    Transmissão RTMP / RTMPS / SRT (YouTube, Twitch, Facebook) do vídeo REAL do Program via FFmpeg.
+    Os quadros vêm do compositor da Estação Desktop (`frame_provider`, definido por
+    weblive_studio_gui.pyw). Com o servidor rodando sozinho não há vídeo do Program, então o
+    início é recusado com uma mensagem clara (nada de "sucesso" sem transmitir).
     """
 
     def __init__(self, db: WebLiveDatabase):
         self.db = db
-        self.process = None
-        self.is_streaming = False
+        self.frame_provider = None
+        self.output = None
         self.current_target = ""
-        self.started_at = None
 
-    def start_test_or_live_stream(self, rtmp_url: str, stream_key: str, resolution: str = "1280x720", fps: int = 30):
+    @property
+    def is_streaming(self) -> bool:
+        return bool(self.output and self.output.active)
+
+    def start_stream(self, rtmp_url: str, stream_key: str):
         if self.is_streaming:
-            return {"ok": False, "message": "Stream RTMP já está em execução."}
+            return {"ok": False, "message": "A transmissão RTMP já está em execução."}
+        if self.frame_provider is None:
+            return {"ok": False, "message": "Abra a Estação Desktop (weblive_studio_gui.pyw): o servidor sozinho não tem o vídeo do Program para transmitir."}
 
-        full_url = rtmp_url.rstrip("/") + "/" + stream_key.strip("/") if stream_key else rtmp_url
-        self.current_target = full_url
-        self.started_at = time.time()
+        rtmp_url = (rtmp_url or "").strip()
+        stream_key = (stream_key or "").strip()
+        if not rtmp_url.startswith(("rtmp://", "rtmps://", "srt://")):
+            return {"ok": False, "message": "O endereço do servidor deve começar com rtmp://, rtmps:// ou srt://"}
+        if not rtmp_url.startswith("srt://") and not stream_key:
+            return {"ok": False, "message": "Informe a chave de transmissão (stream key) fornecida pela plataforma."}
 
-        # Verifica se o binário ffmpeg está instalado no sistema
-        try:
-            subprocess.run(["ffmpeg", "-version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-            has_ffmpeg = True
-        except Exception:
-            has_ffmpeg = False
+        from weblive_video import FFmpegOutput  # import tardio: o servidor sozinho não depende de OpenCV
 
-        if has_ffmpeg and full_url.startswith(("rtmp://", "rtmps://", "srt://")):
-            cmd = [
-                "ffmpeg",
-                "-re",
-                "-f", "lavfi", "-i", f"testsrc=size={resolution}:rate={fps}",
-                "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=44100",
-                "-c:v", "libx264", "-preset", "veryfast", "-b:v", "3500k",
-                "-pix_fmt", "yuv420p", "-g", str(fps * 2),
-                "-c:a", "aac", "-b:a", "128k",
-                "-f", "flv", full_url
-            ]
-            try:
-                self.process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                self.is_streaming = True
-                self.db.add_audit_log(f"Stream RTMP iniciado via FFmpeg para {rtmp_url}", "RTMP")
-                return {"ok": True, "mode": "ffmpeg_native", "target": rtmp_url}
-            except Exception as exc:
-                return {"ok": False, "message": str(exc)}
-
-        # Modo Bridge (Simulado/Pronto para OBS ou gravação WebM via pipe)
-        self.is_streaming = True
-        self.db.add_audit_log(f"Canal de Transmissão RTMP armado: {rtmp_url}", "RTMP")
-        return {
-            "ok": True,
-            "mode": "obs_bridge",
-            "target": rtmp_url,
-            "message": "Pipeline RTMP Python ativo e sincronizado com a saída 1080p60.",
-        }
+        full_url = rtmp_url if rtmp_url.startswith("srt://") else rtmp_url.rstrip("/") + "/" + stream_key.strip("/")
+        self.output = FFmpegOutput("rtmp", self.frame_provider, secret=stream_key)
+        res = self.output.start(full_url)
+        if res.get("ok"):
+            self.current_target = rtmp_url  # nunca expõe a chave em status/SSE
+            self.db.add_audit_log(f"Transmissão RTMP iniciada (Program real via FFmpeg) para {rtmp_url}", "RTMP")
+        return res
 
     def stop_stream(self):
-        if self.process:
-            try:
-                self.process.terminate()
-            except Exception:
-                pass
-            self.process = None
-        self.is_streaming = False
-        self.started_at = None
-        self.db.add_audit_log("Stream RTMP finalizado pelo Diretor", "RTMP")
+        if self.output:
+            self.output.stop(timeout=5.0)
+            self.db.add_audit_log("Transmissão RTMP finalizada pelo Diretor", "RTMP")
         return {"ok": True, "is_streaming": False}
 
+    def check(self):
+        """Mensagem de erro se o FFmpeg caiu sozinho (chave inválida, rede, servidor recusou)."""
+        err = self.output.check() if self.output else None
+        if err:
+            self.db.add_audit_log(f"Transmissão RTMP interrompida: {err[:200]}", "RTMP")
+        return err
+
     def status(self):
-        uptime = int(time.time() - self.started_at) if (self.is_streaming and self.started_at) else 0
         return {
             "is_streaming": self.is_streaming,
-            "target": self.current_target,
-            "uptime_sec": uptime,
+            "target": self.current_target if self.is_streaming else "",
+            "uptime_sec": self.output.uptime if self.output else 0,
         }
+
+
+YTDLP_COOKIES_FILE = BASE_DIR / "cookies.txt"
+YTDLP_FORMAT_WEB = "best[ext=mp4]/best"
+# A Estação Desktop ainda não reproduz o áudio da mídia: pega só o vídeo H.264 até 720p
+YTDLP_FORMAT_DESKTOP = "bestvideo[height<=720][vcodec^=avc1]/best[height<=720]/best"
 
 
 class YtDlpMediaResolver:
     """
     Integração com o pacote Python `yt-dlp` instalado na máquina para extrair
     metadados e URLs diretas de vídeo/áudio (YouTube, Twitch, Instagram, Facebook, TikTok).
+    Se existir `cookies.txt` (formato Netscape) na pasta do programa, ele é usado: o YouTube
+    hoje exige login ("confirme que você não é um robô") para muitos vídeos.
     """
 
     @staticmethod
-    def resolve_url(url: str) -> dict:
+    def resolve_url(url: str, fmt: str = YTDLP_FORMAT_WEB) -> dict:
         if not url:
             return {"ok": False, "error": "URL vazia"}
 
@@ -222,8 +212,10 @@ class YtDlpMediaResolver:
                 "quiet": True,
                 "no_warnings": True,
                 "skip_download": True,
-                "format": "best[ext=mp4]/best",
+                "format": fmt,
             }
+            if YTDLP_COOKIES_FILE.is_file():
+                ydl_opts["cookiefile"] = str(YTDLP_COOKIES_FILE)
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
                 return {
@@ -236,11 +228,17 @@ class YtDlpMediaResolver:
                     "webpage_url": info.get("webpage_url", url),
                 }
         except Exception as exc:
+            msg = str(exc)
+            if "Sign in to confirm" in msg or "cookies" in msg:
+                msg = (
+                    "O YouTube pediu login para liberar este vídeo. Exporte os cookies do seu navegador "
+                    "(extensão \"Get cookies.txt LOCALLY\") e salve como cookies.txt na pasta do WebLive Studio."
+                )
             # Fallback para embed amigável caso a URL seja privada ou live restrita
             return {
                 "ok": False,
                 "fallback_url": url,
-                "error": str(exc),
+                "error": msg,
             }
 
 
@@ -413,8 +411,12 @@ class WebLiveRequestHandler(BaseHTTPRequestHandler):
 
         # 5. Função #37 Real: Buscador Python de Feed RSS (sem bloqueio CORS do navegador)
         if pathname == "/api/rss":
-            rss_url = qs.get("url", ["https://g1.globo.com/rss/g1/"])[0]
-            headlines = self._fetch_real_rss_headlines(rss_url)
+            rss_url = qs.get("url", [DEFAULT_RSS_URL])[0]
+            try:
+                headlines = fetch_rss_headlines(rss_url)
+            except Exception as exc:
+                self._send_json({"ok": False, "headlines": [], "error": str(exc)})
+                return
             self._send_json({"ok": True, "headlines": headlines, "ticker_text": " • ".join(headlines) + " • "})
             return
 
@@ -474,7 +476,7 @@ class WebLiveRequestHandler(BaseHTTPRequestHandler):
         if pathname == "/api/rtmp/start":
             rtmp_url = body.get("rtmp_url", "rtmp://a.rtmp.youtube.com/live2")
             stream_key = body.get("stream_key", "")
-            res = RTMP_ENGINE.start_test_or_live_stream(rtmp_url, stream_key)
+            res = RTMP_ENGINE.start_stream(rtmp_url, stream_key)
             HUB.broadcast({"type": "RTMP_STATUS", "data": RTMP_ENGINE.status()})
             self._send_json(res)
             return
@@ -492,26 +494,75 @@ class WebLiveRequestHandler(BaseHTTPRequestHandler):
 
         self._send_json({"error": "Endpoint POST desconhecido"}, 404)
 
-    @staticmethod
-    def _fetch_real_rss_headlines(rss_url: str):
-        try:
-            req = urllib.request.Request(rss_url, headers={"User-Agent": "WebLiveStudioPro/2.0"})
-            with urllib.request.urlopen(req, timeout=4.0) as resp:
-                xml_bytes = resp.read()
-            root = ET.fromstring(xml_bytes)
-            titles = []
-            for item in root.findall(".//item/title")[:6]:
-                if item.text:
-                    titles.append(f"📰 {item.text.strip()}")
-            if titles:
-                return titles
-        except Exception:
-            pass
-        return [
-            "📡 [FEED RSS PYTHON AO VIVO] • Servidor Broadcast Python 3.14 operando em 60fps com SQLite e yt-dlp nativos",
-            "🎥 [WEBRTC MIX-MINUS] • Barramento de retorno sem eco ativo para repórteres externos no 4G/5G",
-            "⚡ [OBS STUDIO] • Sincronização em sub-milissegundo com Browser Source 1080p60 e Clean Feed",
-        ]
+DEFAULT_RSS_URL = "https://g1.globo.com/rss/g1/"
+HTTP_UA = {"User-Agent": "WebLiveStudioPro/3.1"}
+
+
+def _http_get_json(url: str, timeout: float = 8.0):
+    req = urllib.request.Request(url, headers=HTTP_UA)
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def fetch_rss_headlines(rss_url: str, limit: int = 6):
+    """Manchetes reais de um feed RSS 2.0 ou Atom (#37). Lança exceção se o feed falhar."""
+    req = urllib.request.Request(rss_url, headers=HTTP_UA)
+    with urllib.request.urlopen(req, timeout=6.0) as resp:
+        root = ET.fromstring(resp.read())
+    nodes = root.findall(".//item/title") or root.findall(".//{http://www.w3.org/2005/Atom}entry/{http://www.w3.org/2005/Atom}title")
+    titles = [" ".join(n.text.split()) for n in nodes if n.text and n.text.strip()][:limit]
+    if not titles:
+        raise ValueError("o feed não trouxe nenhuma manchete")
+    return titles
+
+
+WMO_CODES_PT = {
+    0: "Céu limpo", 1: "Predomínio de sol", 2: "Parcialmente nublado", 3: "Nublado",
+    45: "Neblina", 48: "Neblina", 51: "Garoa", 53: "Garoa", 55: "Garoa forte",
+    56: "Garoa congelante", 57: "Garoa congelante", 61: "Chuva fraca", 63: "Chuva", 65: "Chuva forte",
+    66: "Chuva congelante", 67: "Chuva congelante", 71: "Neve", 73: "Neve", 75: "Neve forte", 77: "Neve",
+    80: "Pancadas de chuva", 81: "Pancadas de chuva", 82: "Temporal", 85: "Neve", 86: "Neve",
+    95: "Trovoadas", 96: "Trovoadas com granizo", 99: "Trovoadas com granizo",
+}
+
+
+def fetch_weather(city: str) -> str:
+    """Clima atual real (#36) via Open-Meteo (gratuito, sem chave). Ex.: 'São Paulo 24°C • Nublado'."""
+    q = urllib.parse.urlencode({"name": city, "count": 1, "language": "pt", "format": "json"})
+    geo = _http_get_json(f"https://geocoding-api.open-meteo.com/v1/search?{q}")
+    if not geo.get("results"):
+        raise ValueError(f"cidade não encontrada: {city}")
+    place = geo["results"][0]
+    q = urllib.parse.urlencode({"latitude": place["latitude"], "longitude": place["longitude"], "current": "temperature_2m,weather_code", "timezone": "auto"})
+    cur = _http_get_json(f"https://api.open-meteo.com/v1/forecast?{q}")["current"]
+    desc = WMO_CODES_PT.get(int(cur.get("weather_code", -1)), "")
+    text = f"{place['name']} {round(cur['temperature_2m'])}°C"
+    return f"{text} • {desc}" if desc else text
+
+
+def run_speedtest() -> dict:
+    """Speedtest real (#41) contra speed.cloudflare.com: latência, download e upload em Mbps."""
+    base = "https://speed.cloudflare.com"
+    rtts = []
+    for _ in range(3):
+        t0 = time.perf_counter()
+        with urllib.request.urlopen(urllib.request.Request(f"{base}/__down?bytes=0", headers=HTTP_UA), timeout=8) as r:
+            r.read()
+        rtts.append((time.perf_counter() - t0) * 1000)
+
+    size_down = 10_000_000
+    t0 = time.perf_counter()
+    with urllib.request.urlopen(urllib.request.Request(f"{base}/__down?bytes={size_down}", headers=HTTP_UA), timeout=30) as r:
+        got = len(r.read())
+    down = got * 8 / (time.perf_counter() - t0) / 1e6
+
+    payload = os.urandom(4_000_000)
+    req = urllib.request.Request(f"{base}/__up", data=payload, method="POST", headers={**HTTP_UA, "Content-Type": "application/octet-stream"})
+    t0 = time.perf_counter()
+    with urllib.request.urlopen(req, timeout=30) as r:
+        r.read()
+    up = len(payload) * 8 / (time.perf_counter() - t0) / 1e6
+    return {"ping_ms": min(rtts), "download_mbps": down, "upload_mbps": up}
 
 
 def get_lan_ip() -> str:
